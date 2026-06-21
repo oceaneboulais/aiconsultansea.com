@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="slides-format" content="viewport">
+  <title>AI ConsultanSea — StartBlue Pitch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-bg: #06111a;
+      --color-bg-deep: #02070d;
+      --color-surface: #0e202b;
+      --color-text: #e8f6fb;
+      --color-text-secondary: #b8d5df;
+      --color-text-muted: #78a5b5;
+      --color-accent-1: #00cdd2;
+      --color-accent-2: #78f0ef;
+      --color-accent-3: #1f7d91;
+      --color-glass-bg: rgba(255,255,255,0.06);
+      --color-glass-border: rgba(255,255,255,0.09);
+      --color-vignette: rgba(0,0,0,0.45);
+      --font-display: 'DM Serif Display', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+  </style>
+  <style>
+    :root { --color-bg: #06111a; --color-text: #e8f6fb; --glow-color-rgb: 0,205,210; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { background: var(--color-bg); margin: 0; }
+    body { font-family: var(--font-body); color: var(--color-text); overflow: hidden; height: 100vh; width: 100vw; }
+    .deck { width: 100vw; height: 100vh; position: relative; }
+    .slide { position: absolute; inset: 0; background: var(--color-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); transition: opacity 0.7s ease, transform 0.7s ease; pointer-events: none; overflow: hidden; }
+    .slide.active { opacity: 1; transform: scale(1); pointer-events: all; }
+    .slide > .content { position: relative; z-index: 2; width: 100%; max-width: 1160px; padding: clamp(1.5rem, 4vw, 4rem); }
+    .nav-controls { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; z-index: 100; background: var(--color-glass-bg); backdrop-filter: blur(10px); padding: 10px 24px; border-radius: 40px; border: 1px solid var(--color-glass-border); }
+    .nav-btn { width: 40px; height: 40px; border: none; background: var(--color-glass-bg); color: var(--color-accent-1); border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
+    .nav-btn:hover { background: var(--color-glass-border); }
+    .slide-dots { display: flex; gap: 8px; }
+    .slide-dots .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--color-glass-border); cursor: pointer; transition: background 0.3s, transform 0.3s; }
+    .slide-dots .dot.active { background: var(--color-accent-1); transform: scale(1.3); }
+    .slide-counter { font-size: 0.8rem; color: var(--color-text-muted); min-width: 40px; text-align: center; }
+    .reveal { opacity: 0; transform: translateY(20px); }
+    .gradient-mesh { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(80px); animation: float-slow 12s ease-in-out infinite; }
+    .blob:nth-child(2) { animation: float-drift 16s ease-in-out infinite; }
+    .blob:nth-child(3) { animation: float-slow 20s ease-in-out infinite reverse; }
+    .slide::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-repeat: repeat; background-size: 256px 256px; opacity: 0.03; mix-blend-mode: overlay; }
+    .slide::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 50%, var(--color-vignette) 100%); }
+    .mouse-spotlight { position: fixed; inset: 0; z-index: 99; pointer-events: none; }
+    .text-glow { text-shadow: 0 0 20px rgba(var(--glow-color-rgb), 0.45), 0 0 40px rgba(var(--glow-color-rgb), 0.18); }
+    .stat-glow { text-shadow: 0 0 28px rgba(var(--glow-color-rgb), 0.55), 0 0 56px rgba(var(--glow-color-rgb), 0.2); }
+    .metric-card { background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04)); border: 1px solid var(--color-glass-border); }
+    .signal-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(0,205,210,.8), transparent); }
+    .diagram-node { background: rgba(255,255,255,0.05); border: 1px solid rgba(0,205,210,.22); }
+    .line { height: 14px; border-left: 1px solid rgba(0,205,210,.55); margin: .3rem auto; }
+    .deco-shape { position: absolute; border-radius: 999px; background: radial-gradient(circle, rgba(0,205,210,.12), transparent 70%); filter: blur(6px); }
+    @keyframes float-slow { 0% { transform: translate(0,0) scale(1);} 25% { transform: translate(60px,-50px) scale(1.1);} 50% { transform: translate(-40px,40px) scale(.92);} 75% { transform: translate(50px,20px) scale(1.06);} 100% { transform: translate(0,0) scale(1);} }
+    @keyframes float-drift { 0% { transform: translate(0,0) scale(1) rotate(0deg);} 33% { transform: translate(-50px,-60px) scale(1.14) rotate(3deg);} 66% { transform: translate(40px,30px) scale(.9) rotate(-2deg);} 100% { transform: translate(0,0) scale(1) rotate(0deg);} }
+    @keyframes float { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-15px);} }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="mouse-spotlight"></div>
+<div class="deck">
+  <div class="slide slide-1 active" data-slide="1">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:480px;height:480px;top:-120px;right:-100px;background:var(--color-accent-1);opacity:.15"></div>
+      <div class="blob" style="width:300px;height:300px;bottom:-60px;left:-60px;background:var(--color-accent-2);opacity:.12"></div>
+      <div class="blob" style="width:220px;height:220px;top:42%;left:10%;background:var(--color-accent-3);opacity:.12"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="content text-center">
+      <div class="mx-auto mb-5 flex h-[110px] w-[110px] items-center justify-center rounded-full border border-glass-border bg-glass-bg text-[54px] text-accent-1 shadow-lg reveal">◉</div>
+      <p class="reveal mb-4 text-[0.78rem] uppercase tracking-[0.35em] text-accent-1">StartBlue application pitch</p>
+      <h1 class="reveal font-display text-[clamp(2.6rem,6vw,5.2rem)] font-black tracking-tight bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent">AI ConsultanSea</h1>
+      <p class="reveal mt-4 text-[clamp(1rem,1.5vw,1.35rem)] text-text-secondary">SEASCAPE is building validated, non-invasive biodiversity intelligence for reefs and blue-forest ecosystems.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-2" data-slide="2">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-60px;right:-70px;background:var(--color-accent-1);opacity:.08"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-50px;left:-50px;background:var(--color-accent-2);opacity:.06"></div>
+    </div>
+    <div class="content">
+      <div class="deco-shape" data-speed="0.03" style="width:160px;height:160px;top:15%;right:8%"></div>
+      <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">The problem</p>
+      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">Restoration is growing faster than proof.</h2>
+      <div class="mt-8 grid grid-cols-2 gap-6">
+        <div class="reveal rounded-2xl p-7 metric-card">
+          <p class="text-sm uppercase tracking-[0.2em] text-text-muted">Unmet need</p>
+          <p class="mt-4 text-lg leading-8 text-text-secondary">Coastal restoration still depends on short diver surveys, manual image review, and acoustic proxies that are promising but not yet consistently validated against biological reality.</p>
+        </div>
+        <div class="reveal rounded-2xl p-7 metric-card">
+          <p class="text-sm uppercase tracking-[0.2em] text-text-muted">Why it matters</p>
+          <p class="mt-4 text-lg leading-8 text-text-secondary">Managers, regulators, NGOs, and blue-economy funders need credible, continuous biodiversity metrics to evaluate whether reefs, mangroves, kelp forests, and seagrass systems are actually recovering.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-3" data-slide="3">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-80px;left:-70px;background:var(--color-accent-3);opacity:.08"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-50px;right:-40px;background:var(--color-accent-1);opacity:.08"></div>
+    </div>
+    <div class="content">
+      <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">Scientific foundation</p>
+      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">Sound changes behavior — but sound alone is not enough.</h2>
+      <div class="mt-8 grid grid-cols-3 gap-5">
+        <div class="reveal rounded-2xl p-6 metric-card text-center hover:-translate-y-1 hover:shadow-xl transition">
+          <div class="text-[3rem] font-display stat-glow text-accent-1">4–14×</div>
+          <p class="mt-3 text-sm leading-6 text-text-secondary">Increase in larval abundance at acoustic enrichment sites in field deployments.</p>
+        </div>
+        <div class="reveal rounded-2xl p-6 metric-card text-center hover:-translate-y-1 hover:shadow-xl transition">
+          <div class="text-[3rem] font-display stat-glow text-accent-1">3</div>
+          <p class="mt-3 text-sm leading-6 text-text-secondary">Spawning events across two field seasons informing the product concept.</p>
+        </div>
+        <div class="reveal rounded-2xl p-6 metric-card text-center hover:-translate-y-1 hover:shadow-xl transition">
+          <div class="text-[3rem] font-display stat-glow text-accent-1">360°</div>
+          <p class="mt-3 text-sm leading-6 text-text-secondary">Target monitoring coverage for SEASCAPE’s synchronized visual-acoustic system.</p>
+        </div>
+      </div>
+      <p class="reveal mt-8 max-w-[90ch] text-lg leading-8 text-text-secondary">Our insight is that ecoacoustics becomes much more valuable when paired with biological ground truth: who is present, in what abundance, at what size, and with what behavior when a soundscape changes.</p>
+    </div>
+  </div>
+
+  <div class="slide slide-4" data-slide="4">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:350px;height:350px;top:-90px;right:-80px;background:var(--color-accent-1);opacity:.08"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-40px;left:-40px;background:var(--color-accent-2);opacity:.08"></div>
+    </div>
+    <div class="content">
+      <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">The product</p>
+      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">SEASCAPE converts reef observation into decision-ready data.</h2>
+      <div class="mt-8 grid grid-cols-[1.1fr_0.9fr] gap-8 items-center">
+        <div class="reveal rounded-2xl p-7 metric-card">
+          <div class="space-y-3 text-text-secondary leading-8 text-lg">
+            <p><span class="text-accent-1">•</span> Six stereovision lenses capture 3D abundance, size, and movement.</p>
+            <p><span class="text-accent-1">•</span> Directional hydrophones collect synchronized reef soundscapes.</p>
+            <p><span class="text-accent-1">•</span> SLIP coatings and extended battery design support long deployments.</p>
+            <p><span class="text-accent-1">•</span> AI pipelines automate fish detection, biomass estimates, and ecoacoustic validation.</p>
+          </div>
+        </div>
+        <div class="reveal rounded-2xl p-7 metric-card text-center">
+          <div class="diagram-node rounded-2xl p-4 text-accent-1 text-sm uppercase tracking-[0.2em]">Reef site</div>
+          <div class="line"></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="diagram-node rounded-xl p-4">
+              <div class="text-xl">◌◌</div>
+              <div class="mt-2 text-xs uppercase tracking-[0.18em] text-text-muted">Stereo vision</div>
+            </div>
+            <div class="diagram-node rounded-xl p-4">
+              <div class="text-xl">)))</div>
+              <div class="mt-2 text-xs uppercase tracking-[0.18em] text-text-muted">Acoustics</div>
+            </div>
+          </div>
+          <div class="line"></div>
+          <div class="diagram-node rounded-2xl p-4 text-text-secondary">
+            <div class="text-sm uppercase tracking-[0.2em] text-accent-1">Output</div>
+            <div class="mt-2 text-base">Validated biodiversity and ecosystem-health metrics</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-5" data-slide="5">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:320px;height:320px;top:-70px;left:-70px;background:var(--color-accent-2);opacity:.08"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-50px;right:-40px;background:var(--color-accent-3);opacity:.07"></div>
+    </div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="content">
+      <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">Market</p>
+      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">Our first customers are restoration teams that need proof, not just monitoring.</h2>
+      <div class="mt-8 grid grid-cols-3 gap-5">
+        <div class="reveal rounded-2xl p-6 metric-card hover:-translate-y-1 hover:shadow-xl transition">
+          <p class="text-sm uppercase tracking-[0.18em] text-accent-1">Target customer</p>
+          <p class="mt-3 text-base leading-7 text-text-secondary">Restoration practitioners, NGOs, government agencies, and environmental consultants responsible for biodiversity reporting.</p>
+        </div>
+        <div class="reveal rounded-2xl p-6 metric-card hover:-translate-y-1 hover:shadow-xl transition">
+          <p class="text-sm uppercase tracking-[0.18em] text-accent-1">Early adopters</p>
+          <p class="mt-3 text-base leading-7 text-text-secondary">Science-driven reef and blue-forest pilots, artificial reef programs, and funders who already test advanced monitoring workflows.</p>
+        </div>
+        <div class="reveal rounded-2xl p-6 metric-card hover:-translate-y-1 hover:shadow-xl transition">
+          <p class="text-sm uppercase tracking-[0.18em] text-accent-1">Business value</p>
+          <p class="mt-3 text-base leading-7 text-text-secondary">Continuous validated metrics support permitting, adaptive management, reporting, and outcome-based restoration finance.</p>
+        </div>
+      </div>
+      <div class="reveal mt-8 rounded-2xl p-6 metric-card">
+        <div class="grid grid-cols-3 gap-5 text-center">
+          <div><div class="text-sm uppercase tracking-[0.18em] text-text-muted">TAM</div><div class="mt-2 text-xl font-display text-accent-1">Ocean observation</div></div>
+          <div><div class="text-sm uppercase tracking-[0.18em] text-text-muted">SAM</div><div class="mt-2 text-xl font-display text-accent-1">Coastal restoration monitoring</div></div>
+          <div><div class="text-sm uppercase tracking-[0.18em] text-text-muted">SOM</div><div class="mt-2 text-xl font-display text-accent-1">High-value pilot sites</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-6" data-slide="6">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:320px;height:320px;top:-60px;right:-80px;background:var(--color-accent-1);opacity:.09"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-40px;left:-40px;background:var(--color-accent-2);opacity:.07"></div>
+    </div>
+    <div class="content">
+      <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">Traction and moat</p>
+      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">We are building from field evidence, not from a blank page.</h2>
+      <div class="mt-8 grid grid-cols-2 gap-6">
+        <div class="reveal rounded-2xl p-7 metric-card">
+          <p class="text-sm uppercase tracking-[0.18em] text-accent-1">What we’ve already done</p>
+          <ul class="mt-4 space-y-3 text-base leading-7 text-text-secondary">
+            <li>Field-tested acoustic enrichment research in Hawai‘i.</li>
+            <li>Defined the monitoring bottleneck through manual image review and low-cost camera deployments.</li>
+            <li>Mapped the product roadmap from research prototype to long-deployment monitoring node.</li>
+            <li>Received $10,000 in non-dilutive support through the Ferguson Family Prize.</li>
+          </ul>
+        </div>
+        <div class="reveal rounded-2xl p-7 metric-card">
+          <p class="text-sm uppercase tracking-[0.18em] text-accent-1">Why we win</p>
+          <ul class="mt-4 space-y-3 text-base leading-7 text-text-secondary">
+            <li>Direct expertise in reef bioacoustics, restoration monitoring, and field logistics.</li>
+            <li>Integrated visual + acoustic validation rather than single-modality sensing.</li>
+            <li>Non-invasive monitoring designed for real deployment timelines.</li>
+            <li>Outputs aimed at practitioners, agencies, and funders — not just academic publication.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-7" data-slide="7">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:430px;height:430px;top:-100px;right:-90px;background:var(--color-accent-1);opacity:.14"></div>
+      <div class="blob" style="width:300px;height:300px;bottom:-80px;left:-60px;background:var(--color-accent-2);opacity:.12"></div>
+      <div class="blob" style="width:200px;height:200px;top:42%;left:14%;background:var(--color-accent-3);opacity:.1"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="content text-center">
+      <p class="reveal mb-4 text-[0.78rem] uppercase tracking-[0.35em] text-accent-1">Why StartBlue</p>
+      <h2 class="reveal font-display text-[clamp(2.3rem,5vw,4.5rem)] font-black tracking-tight bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent">Turning ocean science into deployable infrastructure.</h2>
+      <p class="reveal mx-auto mt-6 max-w-[46rem] text-[1.08rem] leading-8 text-text-secondary">AI ConsultanSea is applying to StartBlue to refine customer discovery, accelerate prototype commercialization, and turn SEASCAPE into a scalable monitoring product for reef and blue-forest restoration.</p>
+      <div class="reveal mx-auto mt-8 w-[320px] signal-line"></div>
+      <p class="reveal mt-8 text-[1rem] uppercase tracking-[0.22em] text-accent-1">AI ConsultanSea • flagship product: SEASCAPE</p>
+    </div>
+  </div>
+</div>
+<div class="nav-controls">
+  <button class="nav-btn" onclick="changeSlide(-1)">&#8249;</button>
+  <div class="slide-dots" id="dots"></div>
+  <button class="nav-btn" onclick="changeSlide(1)">&#8250;</button>
+  <span class="slide-counter" id="counter">1 / 7</span>
+</div>
+<script>
+  let current = 1;
+  const total = document.querySelectorAll('.slide').length;
+  const dotsContainer = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  for (let i = 1; i <= total; i++) { const dot = document.createElement('div'); dot.className = 'dot' + (i === 1 ? ' active' : ''); dot.onclick = () => goToSlide(i); dotsContainer.appendChild(dot); }
+  function goToSlide(n) { const prev = document.querySelector('.slide.active'); const next = document.querySelector(`.slide[data-slide="${n}"]`); if (prev) prev.classList.remove('active'); if (next) { next.classList.add('active'); animateSlide(next); } current = n; updateNav(); }
+  function changeSlide(dir) { let next = current + dir; if (next < 1) next = total; if (next > total) next = 1; goToSlide(next); }
+  function updateNav() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i + 1 === current)); counter.textContent = current + ' / ' + total; }
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); } if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); } });
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => { const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1); });
+  function animateSlide(slide) {
+    slide.querySelectorAll('.reveal').forEach((el, i) => {
+      el.style.transition = 'none'; el.style.opacity = '0'; el.style.transform = 'translateY(20px)'; el.offsetHeight;
+      const delay = i * 0.08;
+      el.style.transition = `opacity 0.35s ease ${delay}s, transform 0.35s ease ${delay}s`;
+      el.style.opacity = '1'; el.style.transform = 'translateY(0px)';
+    });
+  }
+  document.addEventListener('mousemove', (e) => {
+    const spotlight = document.querySelector('.mouse-spotlight');
+    if (spotlight) {
+      const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '0,205,210';
+      spotlight.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(${rgb}, 0.06), transparent 40%)`;
+    }
+  });
+  (function() {
+    let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+    (function tick() {
+      const ox = (mouseX - cx) / cx, oy = (mouseY - cy) / cy;
+      document.querySelectorAll('.deco-shape').forEach(shape => {
+        const speed = parseFloat(shape.dataset.speed) || 0.03;
+        shape.style.transform = `translate(${ox * speed * 100}px, ${oy * speed * 100}px)`;
+      });
+      requestAnimationFrame(tick);
+    })();
+  })();
+  window.initParticles = function(canvas, options) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+    const interactive = options.interactive !== false;
+    const count = options.count || (interactive ? 55 : 18);
+    let mx = -1000, my = -1000;
+    const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '0,205,210';
+    const [r,g,b] = rgb.split(',').map(Number);
+    const particles = Array.from({ length: count }, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3, size:Math.random()*2.5+0.8, alpha:Math.random()*0.35+0.1 }));
+    if (interactive) {
+      canvas.addEventListener('mousemove', (e) => { const rect = canvas.getBoundingClientRect(); mx = e.clientX - rect.left; my = e.clientY - rect.top; });
+      canvas.addEventListener('mouseleave', () => { mx = -1000; my = -1000; });
+    }
+    (function animate() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p => {
+        if (interactive) {
+          const dx = p.x - mx, dy = p.y - my, dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < 120) { const force = (120 - dist) / 120 * 2; p.vx += (dx / dist) * force * 0.1; p.vy += (dy / dist) * force * 0.1; }
+        }
+        p.vx *= 0.98; p.vy *= 0.98; p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0; if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha})`; ctx.fill();
+      });
+      requestAnimationFrame(animate);
+    })();
+  };
+  document.querySelectorAll('.particle-canvas').forEach(c => window.initParticles(c, { interactive: true, count: 55 }));
+  document.querySelectorAll('.particle-canvas-ambient').forEach(c => window.initParticles(c, { interactive: false, count: 18 }));
+  try { animateSlide(document.querySelector('.slide.active')); } catch(e) {}
+</script>
+</body>
+</html>
