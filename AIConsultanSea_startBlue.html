@@ -33,9 +33,10 @@
     html, body { background: var(--color-bg); margin: 0; }
     body { font-family: var(--font-body); color: var(--color-text); overflow: hidden; height: 100vh; width: 100vw; }
     .deck { width: 100vw; height: 100vh; position: relative; }
-    .slide { position: absolute; inset: 0; background: var(--color-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); transition: opacity 0.7s ease, transform 0.7s ease; pointer-events: none; overflow: hidden; }
+    .slide { position: absolute; inset: 0; background: var(--color-bg); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; opacity: 0; transform: scale(0.95); transition: opacity 0.7s ease, transform 0.7s ease; pointer-events: none; overflow-y: auto; overflow-x: hidden; padding-bottom: 80px; scrollbar-width: none; }
+    .slide::-webkit-scrollbar { display: none; }
     .slide.active { opacity: 1; transform: scale(1); pointer-events: all; }
-    .slide > .content { position: relative; z-index: 2; width: 100%; max-width: 1160px; padding: clamp(1.5rem, 4vw, 4rem); }
+    .slide > .content { position: relative; z-index: 2; width: 100%; max-width: 1160px; padding: clamp(1rem, 3vw, 4rem); margin-block: auto; }
     .nav-controls { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; z-index: 100; background: var(--color-glass-bg); backdrop-filter: blur(10px); padding: 10px 24px; border-radius: 40px; border: 1px solid var(--color-glass-border); }
     .nav-btn { width: 40px; height: 40px; border: none; background: var(--color-glass-bg); color: var(--color-accent-1); border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
     .nav-btn:hover { background: var(--color-glass-border); }
@@ -63,6 +64,14 @@
     @keyframes float { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-15px);} }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+    }
+    /* ── Responsive overrides ── */
+    @media (max-width: 639px) {
+      .slide > .content .metric-card { padding: 1rem 1.125rem !important; }
+      .slide > .content .metric-card p,
+      .slide > .content .metric-card li { font-size: 0.9rem !important; line-height: 1.65 !important; }
+      .slide > .content .diagram-node { padding: 0.6rem 0.5rem !important; font-size: 0.8rem; }
+      .slide > .content h1, .slide > .content h2 { word-break: break-word; hyphens: auto; }
     }
   </style>
 </head>
@@ -92,8 +101,8 @@
     <div class="content">
       <div class="deco-shape" data-speed="0.03" style="width:160px;height:160px;top:15%;right:8%"></div>
       <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">The problem</p>
-      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">Restoration is growing faster than proof.</h2>
-      <div class="mt-8 grid grid-cols-2 gap-6">
+      <h2 class="reveal font-display text-[clamp(1.6rem,4.4vw,3.2rem)] font-bold">Restoration is growing faster than proof.</h2>
+      <div class="mt-5 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div class="reveal rounded-2xl p-7 metric-card">
           <p class="text-sm uppercase tracking-[0.2em] text-text-muted">Unmet need</p>
           <p class="mt-4 text-lg leading-8 text-text-secondary">Coastal restoration still depends on short diver surveys, manual image review, and acoustic proxies that are promising but not yet consistently validated against biological reality.</p>
@@ -113,8 +122,8 @@
     </div>
     <div class="content">
       <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">Scientific foundation</p>
-      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">Sound changes behavior — but sound alone is not enough.</h2>
-      <div class="mt-8 grid grid-cols-3 gap-5">
+      <h2 class="reveal font-display text-[clamp(1.6rem,4.4vw,3.2rem)] font-bold">Sound changes behavior — but sound alone is not enough.</h2>
+      <div class="mt-5 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
         <div class="reveal rounded-2xl p-6 metric-card text-center hover:-translate-y-1 hover:shadow-xl transition">
           <div class="text-[3rem] font-display stat-glow text-accent-1">4–14×</div>
           <p class="mt-3 text-sm leading-6 text-text-secondary">Increase in larval abundance at acoustic enrichment sites in field deployments.</p>
@@ -139,8 +148,8 @@
     </div>
     <div class="content">
       <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">The product</p>
-      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">SEASCAPE converts reef observation into decision-ready data.</h2>
-      <div class="mt-8 grid grid-cols-[1.1fr_0.9fr] gap-8 items-center">
+      <h2 class="reveal font-display text-[clamp(1.6rem,4.4vw,3.2rem)] font-bold">SEASCAPE converts reef observation into decision-ready data.</h2>
+      <div class="mt-5 sm:mt-8 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-8 items-center">
         <div class="reveal rounded-2xl p-7 metric-card">
           <div class="space-y-3 text-text-secondary leading-8 text-lg">
             <p><span class="text-accent-1">•</span> Six stereovision lenses capture 3D abundance, size, and movement.</p>
@@ -180,8 +189,8 @@
     <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1"></canvas>
     <div class="content">
       <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">Market</p>
-      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">Our first customers are restoration teams that need proof, not just monitoring.</h2>
-      <div class="mt-8 grid grid-cols-3 gap-5">
+      <h2 class="reveal font-display text-[clamp(1.6rem,4.4vw,3.2rem)] font-bold">Our first customers are restoration teams that need proof, not just monitoring.</h2>
+      <div class="mt-5 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
         <div class="reveal rounded-2xl p-6 metric-card hover:-translate-y-1 hover:shadow-xl transition">
           <p class="text-sm uppercase tracking-[0.18em] text-accent-1">Target customer</p>
           <p class="mt-3 text-base leading-7 text-text-secondary">Restoration practitioners, NGOs, government agencies, and environmental consultants responsible for biodiversity reporting.</p>
@@ -196,7 +205,7 @@
         </div>
       </div>
       <div class="reveal mt-8 rounded-2xl p-6 metric-card">
-        <div class="grid grid-cols-3 gap-5 text-center">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 text-center">
           <div><div class="text-sm uppercase tracking-[0.18em] text-text-muted">TAM</div><div class="mt-2 text-xl font-display text-accent-1">Ocean observation</div></div>
           <div><div class="text-sm uppercase tracking-[0.18em] text-text-muted">SAM</div><div class="mt-2 text-xl font-display text-accent-1">Coastal restoration monitoring</div></div>
           <div><div class="text-sm uppercase tracking-[0.18em] text-text-muted">SOM</div><div class="mt-2 text-xl font-display text-accent-1">High-value pilot sites</div></div>
@@ -212,8 +221,8 @@
     </div>
     <div class="content">
       <p class="reveal mb-4 text-[0.75rem] uppercase tracking-[0.3em] text-accent-1">Traction and moat</p>
-      <h2 class="reveal font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold">We are building from field evidence, not from a blank page.</h2>
-      <div class="mt-8 grid grid-cols-2 gap-6">
+      <h2 class="reveal font-display text-[clamp(1.6rem,4.4vw,3.2rem)] font-bold">We are building from field evidence, not from a blank page.</h2>
+      <div class="mt-5 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div class="reveal rounded-2xl p-7 metric-card">
           <p class="text-sm uppercase tracking-[0.18em] text-accent-1">What we’ve already done</p>
           <ul class="mt-4 space-y-3 text-base leading-7 text-text-secondary">
@@ -245,7 +254,7 @@
     <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1"></canvas>
     <div class="content text-center">
       <p class="reveal mb-4 text-[0.78rem] uppercase tracking-[0.35em] text-accent-1">Why StartBlue</p>
-      <h2 class="reveal font-display text-[clamp(2.3rem,5vw,4.5rem)] font-black tracking-tight bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent">Turning ocean science into deployable infrastructure.</h2>
+      <h2 class="reveal font-display text-[clamp(1.7rem,5vw,4.5rem)] font-black tracking-tight bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent">Turning ocean science into deployable infrastructure.</h2>
       <p class="reveal mx-auto mt-6 max-w-[46rem] text-[1.08rem] leading-8 text-text-secondary">AI ConsultanSea is applying to StartBlue to refine customer discovery, accelerate prototype commercialization, and turn SEASCAPE into a scalable monitoring product for reef and blue-forest restoration.</p>
       <div class="reveal mx-auto mt-8 w-[320px] signal-line"></div>
       <p class="reveal mt-8 text-[1rem] uppercase tracking-[0.22em] text-accent-1">AI ConsultanSea • flagship product: SEASCAPE</p>
