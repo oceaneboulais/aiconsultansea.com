@@ -73,10 +73,52 @@
       .slide > .content .diagram-node { padding: 0.6rem 0.5rem !important; font-size: 0.8rem; }
       .slide > .content h1, .slide > .content h2 { word-break: break-word; hyphens: auto; }
     }
+    /* Landing screen */
+    .landing { position: fixed; inset: 0; z-index: 200; background: var(--color-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.7s ease, transform 0.7s ease; }
+    .landing.hidden { opacity: 0; pointer-events: none; transform: scale(1.03); }
+    .landing-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; width: 100%; max-width: 1160px; padding: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+    .landing-video-wrap { position: relative; width: 100%; border-radius: 1.25rem; overflow: hidden; border: 1px solid rgba(0,205,210,.2); box-shadow: 0 0 60px rgba(0,205,210,.08); background: #000; aspect-ratio: 16/9; }
+    .landing-video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .landing-deck-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; border-radius: 1.25rem; border: 1px solid rgba(0,205,210,.18); background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)); backdrop-filter: blur(12px); padding: 3rem 2.5rem; cursor: pointer; transition: box-shadow 0.35s, border-color 0.35s, transform 0.35s; text-align: center; }
+    .landing-deck-card:hover { box-shadow: 0 0 60px rgba(0,205,210,.18); border-color: rgba(0,205,210,.45); transform: translateY(-4px); }
+    .landing-deck-btn { display: inline-flex; align-items: center; gap: 0.6rem; background: var(--color-accent-1); color: #06111a; font-weight: 700; font-size: 1rem; padding: 0.85rem 2rem; border-radius: 40px; border: none; cursor: pointer; transition: background 0.2s, transform 0.2s; letter-spacing: 0.04em; }
+    .landing-deck-btn:hover { background: var(--color-accent-2); transform: scale(1.04); }
+    @media (max-width: 768px) {
+      .landing-inner { grid-template-columns: 1fr; }
+      .landing-deck-card { padding: 2rem 1.5rem; }
+    }
   </style>
 </head>
 <body>
 <div class="mouse-spotlight"></div>
+
+<!-- ── Landing Screen ── -->
+<div class="landing" id="landing">
+  <div class="gradient-mesh" style="position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none">
+    <div class="blob" style="width:500px;height:500px;top:-140px;right:-120px;background:var(--color-accent-1);opacity:.12"></div>
+    <div class="blob" style="width:320px;height:320px;bottom:-80px;left:-80px;background:var(--color-accent-2);opacity:.1"></div>
+  </div>
+  <div class="landing-inner" style="position:relative;z-index:2">
+    <!-- Left: YouTube video -->
+    <div>
+      <p style="font-size:0.72rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--color-accent-1);margin-bottom:1rem">Team pitch · 2 min</p>
+      <div class="landing-video-wrap">
+        <iframe src="https://www.youtube.com/embed/bbAfGjfSlGw?rel=0&modestbranding=1" title="AI ConsultanSea — Team Pitch" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+    <!-- Right: Pitch deck access -->
+    <div class="landing-deck-card" onclick="enterDeck()">
+      <div style="font-size:3.5rem;line-height:1">◉</div>
+      <div>
+        <p style="font-size:0.72rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--color-accent-1);margin-bottom:0.5rem">StartBlue Application</p>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.5rem,2.5vw,2.4rem);font-weight:700;line-height:1.2;margin:0 0 0.75rem">AI ConsultanSea<br>Pitch Deck</h2>
+        <p style="color:var(--color-text-secondary);font-size:0.95rem;line-height:1.7;margin:0 0 1.5rem">7 slides covering problem, science, product, market, and traction.</p>
+      </div>
+      <button class="landing-deck-btn">View Pitch Deck &nbsp;›</button>
+    </div>
+  </div>
+</div>
+
 <div class="deck">
   <div class="slide slide-1 active" data-slide="1">
     <div class="gradient-mesh">
@@ -261,13 +303,23 @@
     </div>
   </div>
 </div>
-<div class="nav-controls">
+<div class="nav-controls" id="navControls" style="opacity:0;pointer-events:none;transition:opacity 0.5s ease">
   <button class="nav-btn" onclick="changeSlide(-1)">&#8249;</button>
   <div class="slide-dots" id="dots"></div>
   <button class="nav-btn" onclick="changeSlide(1)">&#8250;</button>
   <span class="slide-counter" id="counter">1 / 7</span>
 </div>
 <script>
+  function enterDeck() {
+    const landing = document.getElementById('landing');
+    const nav = document.getElementById('navControls');
+    landing.classList.add('hidden');
+    nav.style.opacity = '1';
+    nav.style.pointerEvents = 'all';
+    // Ensure first slide is active and animated
+    goToSlide(1);
+  }
+
   let current = 1;
   const total = document.querySelectorAll('.slide').length;
   const dotsContainer = document.getElementById('dots');
