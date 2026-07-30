@@ -349,7 +349,7 @@
     <button class="tab-btn" data-tab="research" onclick="showTab('research')">Research</button>
     <button class="tab-btn" data-tab="crew" onclick="showTab('crew')">Crew</button>
   </div>
-  <button class="support-btn" onclick="openModal()">&#x2665; Support the Oceans</button>
+  <a class="support-btn" href="collectivsea-mission.html">&#x2665; Support Ocean Restoration Through Sci-Art</a>
 </nav>
 
 
@@ -582,35 +582,6 @@
 </div><!-- /crew-view -->
 
 
-<!-- COLLECTIVSEA MODAL -->
-<div id="modal-overlay" class="modal-overlay" onclick="handleModalClick(event)">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
-    <p class="modal-eyebrow">Non-profit &bull; Art &amp; Science Collective</p>
-    <h2 class="modal-title">CollectivSea</h2>
-    <p class="modal-tagline">An art collective creating a playborhood for blue-minded artists, scientists, researchers &amp; designers to share the story of our undiscovered blue planet.</p>
-    <div class="modal-section">
-      <h4>Our Mission</h4>
-      <p>Create immersive experiences for humans to emotionally connect to our oceans. Expand our blue-mind understanding, making marine science more accessible through playful exploration and discovery.</p>
-    </div>
-    <div class="modal-divider"></div>
-    <div class="modal-section">
-      <h4>The Polyp Pod</h4>
-      <p>Our first project &mdash; an immersive, interactive sci-art exhibit that invites explorers to walk inside and become a coral polyp within a dynamic reef ecosystem. Enter surrounded by coral-generating frequencies: reef soundscapes from K&#x101;ne&#x02BB;ohe Bay, O&#x02BB;ahu, composed of snapping shrimp and reef fish chorus. Built off-grid with solar power, CNC-milled timber panels, and a 3D-modelled rice coral shell.</p>
-    </div>
-    <div class="modal-divider"></div>
-    <div class="modal-section">
-      <h4>Why it matters</h4>
-      <p>By bringing sensory experiences out of the ocean and into accessible spaces &mdash; aquarium exhibits, classrooms, galleries &mdash; CollectivSea builds the emotional bridge between humans and the ecosystems we urgently need to protect.</p>
-    </div>
-    <div class="modal-cta">
-      <a href="https://www.collectivsea.org" target="_blank" rel="noopener" class="cta-primary">Visit CollectivSea &rarr;</a>
-      <a href="https://www.kickstarter.com/projects/collectivsea/the-coral-polyp-pod" target="_blank" rel="noopener" class="cta-secondary">Support the Polyp Pod</a>
-    </div>
-  </div>
-</div>
-
-
 <footer>
   <p>&copy; 2026 AI ConsultanSea &nbsp;&middot;&nbsp; <a href="https://aiconsultansea.com">aiconsultansea.com</a></p>
 </footer>
@@ -626,17 +597,6 @@
     window.scrollTo({ top: 0, behavior: 'instant' });
     if (tab === 'crew') observeCrew();
   }
-
-  /* ── MODAL ── */
-  function openModal() {
-    document.getElementById('modal-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeModal() {
-    document.getElementById('modal-overlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  function handleModalClick(e) { if (e.target === e.currentTarget) closeModal(); }
 
   /* ── SCROLL OBSERVER ── */
   const io = new IntersectionObserver(entries => {
