@@ -241,14 +241,33 @@
       transition:border-color .35s, background .35s, transform .35s; cursor:default;
     }
     .crew-card:hover { border-color:rgba(0,205,210,.3); background:rgba(0,205,210,.04); transform:translateY(-4px); }
-    .crew-avatar {
-      width:54px; height:54px; border-radius:50%;
-      background:rgba(0,205,210,.08); border:1px solid rgba(0,205,210,.2);
-      display:flex; align-items:center; justify-content:center;
-      font-family:'DM Serif Display',serif; font-size:1.2rem; color:var(--accent); margin-bottom:1.6rem;
-    }
     .crew-name { font-family:'DM Serif Display',serif; font-size:1.2rem; color:var(--text); margin-bottom:.5rem; }
     .crew-role { font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); }
+    .crew-contact { max-width:960px; margin:3.25rem auto 0; }
+    .crew-contact-card {
+      border:1px solid rgba(0,205,210,.18); border-radius:22px;
+      padding:2rem; background:linear-gradient(145deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      box-shadow:0 0 40px rgba(0,205,210,.06);
+    }
+    .crew-contact-card h3 { font-family:'DM Serif Display',serif; font-size:1.5rem; color:var(--text); margin:0 0 .6rem; }
+    .crew-contact-card p { color:var(--muted); line-height:1.75; margin:0 0 1.25rem; }
+    .crew-contact-form { display:grid; gap:1rem; }
+    .form-row { display:grid; gap:.5rem; }
+    .form-row label { font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); }
+    .form-row input, .form-row textarea {
+      width:100%; border:1px solid rgba(0,205,210,.2); border-radius:12px;
+      background:rgba(2,8,20,.7); color:var(--text); padding:.85rem 1rem;
+      font:inherit; outline:none; transition:border-color .2s, box-shadow .2s;
+    }
+    .form-row input:focus, .form-row textarea:focus {
+      border-color:rgba(0,205,210,.45); box-shadow:0 0 0 3px rgba(0,205,210,.12);
+    }
+    .form-row textarea { min-height:140px; resize:vertical; }
+    .crew-contact-form button {
+      justify-self:start; border:none; border-radius:999px; padding:.9rem 1.35rem;
+      background:var(--accent); color:var(--bg); font-weight:700; cursor:pointer; transition:transform .2s, background .2s;
+    }
+    .crew-contact-form button:hover { background:var(--accent2); transform:translateY(-2px); }
 
     /* COLLECTIVSEA MODAL */
     .modal-overlay {
@@ -339,7 +358,7 @@
 
   <section class="hero">
     <h1 class="hero-title">The ocean<br>is <em>speaking.</em><br>Are we listening?</h1>
-    <p class="hero-sub">We build intelligent tools for the scientists working to understand what blue forests are saying &mdash; coral reefs, kelp, mangroves, and eelgrass &mdash; and act on it before it&rsquo;s too late.</p>
+    <p class="hero-sub">We build intelligent audio and visual monitoring tools for scientists, coastal communities, subsistence wild capture practitioners, and farmers working to understand what blue forests are saying &mdash; coral reefs, kelp, mangroves, and eelgrass &mdash; and act on it before it&rsquo;s too late.</p>
     <div class="scroll-cue">
       <span>Scroll</span>
       <div class="scroll-cue-line"></div>
@@ -401,7 +420,7 @@
   <section class="story">
     <div class="story-inner">
       <span class="ch-label">04 &mdash; The Technology</span>
-      <h2 class="story-h">Built for the<br>deep end.</h2>
+      <h2 class="story-h">Built for<br>long endurance</h2>
       <p class="story-p"><strong>Stereo depth perception &mdash;</strong> Three stereo-vision pairs reconstruct 3D fish trajectories, automatically distinguishing swimming larvae from drifting debris &mdash; a problem unsolvable with 2D cameras.</p>
       <p class="story-p"><strong>SLIP coatings &mdash;</strong> Organic, non-toxic slippery liquid-infused porous surface coatings prevent biofouling, keeping optics clear across months of deployment rather than weeks.</p>
       <p class="story-p"><strong>Lunar-scale deployments &mdash;</strong> Extended battery life lets us capture multiple lunar cycles &mdash; the natural rhythm of larval settlement &mdash; closing a fundamental gap in existing monitoring systems.</p>
@@ -446,8 +465,8 @@
         <p class="story-p">Acoustic enrichment (AE) &mdash; the playback of ambient sound from healthy coral reefs &mdash; shows promise in attracting fish larvae to degraded or artificial reefs. Previous evaluations relied on invasive diver-based sampling, limiting most studies to short deployments in calm, accessible environments.</p>
         <p class="story-p">This study used <strong>fully autonomous cameras</strong> to non-invasively evaluate AE efficacy across large fractions of a lunar cycle. Autonomous AE systems were deployed in K&#x101;ne&#x02BB;ohe Bay (O&#x02BB;ahu, Hawai&#x02BB;i) over <strong>three spawning events</strong> &mdash; August 2023, June&ndash;July 2024 &mdash; at 5&nbsp;m water depth on a sandy seabed.</p>
         <div class="quote-block">
-          <p>&ldquo;Treatment and control designations were alternated between deployments to remove potential spatial bias &mdash; ensuring the signal we detected was real.&rdquo;</p>
-          <cite>Boulais et al., 2025 (in review)</cite>
+          <p>&ldquo;Treatment and control designations were alternated between deployments to remove potential spatial bias over multiple years, months and lunar cycles &mdash; ensuring the fish larvae response we detected was real.&rdquo;</p>
+          <cite><a href="https://www.nature.com/articles/s41598-026-57857-9" target="_blank" rel="noopener noreferrer">Boulais et al., 2025</a></cite>
         </div>
       </div>
     </section>
@@ -532,10 +551,32 @@
       <p>Scientists, engineers, and ocean advocates building the tools that marine conservation has been waiting for.</p>
     </div>
     <div class="crew-grid">
-      <div class="crew-card"><div class="crew-avatar">CP</div><div class="crew-name">Corinne Pickering</div><div class="crew-role">Co-founder</div></div>
-      <div class="crew-card"><div class="crew-avatar">AH</div><div class="crew-name">Angel Huang</div><div class="crew-role">Co-founder</div></div>
-      <div class="crew-card"><div class="crew-avatar">PN</div><div class="crew-name">Pauli Nesser</div><div class="crew-role">Co-founder</div></div>
-      <div class="crew-card"><div class="crew-avatar">OB</div><div class="crew-name">Oc&eacute;ane Boulais</div><div class="crew-role">Co-founder</div></div>
+      <div class="crew-card"><div class="crew-name">Corinne Pickering</div><div class="crew-role">Co-founder</div></div>
+      <div class="crew-card"><div class="crew-name">Angel Huang</div><div class="crew-role">Co-founder</div></div>
+      <div class="crew-card"><div class="crew-name">Pauli Nesser</div><div class="crew-role">Co-founder</div></div>
+      <div class="crew-card"><div class="crew-name">Oc&eacute;ane Boulais</div><div class="crew-role">Founder, Lead Technologist</div></div>
+    </div>
+
+    <div class="crew-contact">
+      <div class="crew-contact-card">
+        <h3>Interested in setting sail with us?</h3>
+        <p>Share a little about your idea, project, or question and we&rsquo;ll be in touch.</p>
+        <form class="crew-contact-form" action="mailto:collectivsea@gmail.com" method="post" enctype="text/plain" onsubmit="return handleCrewContactSubmit(this);">
+          <div class="form-row">
+            <label for="crew-name">Name</label>
+            <input id="crew-name" name="name" type="text" autocomplete="name" required>
+          </div>
+          <div class="form-row">
+            <label for="crew-email">Email address</label>
+            <input id="crew-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="form-row">
+            <label for="crew-message">Message</label>
+            <textarea id="crew-message" name="message" required></textarea>
+          </div>
+          <button type="submit">Send message</button>
+        </form>
+      </div>
     </div>
   </div>
 </div><!-- /crew-view -->
@@ -602,6 +643,20 @@
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
   }, { threshold: 0.1 });
   document.querySelectorAll('.story-inner').forEach(el => io.observe(el));
+
+  function handleCrewContactSubmit(form) {
+    const name = form.elements.namedItem('name').value.trim();
+    const email = form.elements.namedItem('email').value.trim();
+    const message = form.elements.namedItem('message').value.trim();
+
+    if (!name || !email || !message) return false;
+
+    const subject = encodeURIComponent('Website inquiry from ' + name);
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
+    window.location.href = `mailto:collectivsea@gmail.com?subject=${subject}&body=${body}`;
+    form.reset();
+    return false;
+  }
 
   function observeCrew() {
     document.querySelectorAll('.crew-card').forEach((el, i) => {
