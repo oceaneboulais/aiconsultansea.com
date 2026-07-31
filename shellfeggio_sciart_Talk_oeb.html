@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="slides-format" content="viewport" />
+  <title>Sounding the Reef: An Immersive Art Exhibit for Coral Reef Ecosystem Restoration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-bg: #07131a;
+      --color-bg-deep: #041018;
+      --color-surface: #10252f;
+      --color-text: #eef7f6;
+      --color-text-secondary: #c7dcda;
+      --color-text-muted: #89a8ad;
+      --color-accent-1: #66e0d2;
+      --color-accent-2: #8ab4ff;
+      --color-accent-3: #ffd37a;
+      --color-glass-bg: rgba(255,255,255,0.07);
+      --color-glass-border: rgba(255,255,255,0.12);
+      --color-vignette: rgba(0,0,0,0.42);
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+  </style>
+  <style>
+    :root { --color-bg: #07131a; --color-text: #eef7f6; --glow-color-rgb: 102,224,210; --font-body:'Plus Jakarta Sans',system-ui,sans-serif; }
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{background:var(--color-bg);margin:0}
+    body{font-family:var(--font-body);color:var(--color-text);overflow:hidden;height:100vh;width:100vw}
+    .deck{width:100vw;height:100vh;position:relative}
+    .slide{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at top right, rgba(102,224,210,0.08), transparent 28%),linear-gradient(180deg,#07131a 0%,#041018 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:scale(.95);transition:opacity .7s ease,transform .7s ease;pointer-events:none;overflow:hidden}
+    .slide.active{opacity:1;transform:scale(1);pointer-events:all}
+    .slide>.content{position:relative;z-index:2;width:100%;max-width:1160px;padding:clamp(1.5rem,4vw,4rem)}
+    .nav-controls{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;z-index:100;background:rgba(8,20,28,.7);backdrop-filter:blur(12px);padding:10px 24px;border-radius:40px;border:1px solid rgba(255,255,255,.1)}
+    .nav-btn{width:40px;height:40px;border:none;background:rgba(255,255,255,.06);color:#66e0d2;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .slide-dots{display:flex;gap:8px}.slide-dots .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.16);cursor:pointer}.slide-dots .dot.active{background:#66e0d2;transform:scale(1.25)}
+    .slide-counter{font-size:.8rem;color:#89a8ad;min-width:44px;text-align:center}
+    .reveal{opacity:0;transform:translateY(20px)}
+    .gradient-mesh{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+    .blob{position:absolute;border-radius:50%;filter:blur(90px);animation:float-slow 12s ease-in-out infinite}
+    .blob:nth-child(2){animation:float-drift 16s ease-in-out infinite}.blob:nth-child(3){animation:float-slow 18s ease-in-out infinite reverse}
+    @keyframes float-slow{0%{transform:translate(0,0) scale(1)}25%{transform:translate(50px,-40px) scale(1.08)}50%{transform:translate(-30px,35px) scale(.92)}75%{transform:translate(35px,15px) scale(1.04)}100%{transform:translate(0,0) scale(1)}}
+    @keyframes float-drift{0%{transform:translate(0,0) scale(1)}33%{transform:translate(-45px,-55px) scale(1.14)}66%{transform:translate(35px,28px) scale(.9)}100%{transform:translate(0,0) scale(1)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+    .slide::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px 256px;opacity:.03;mix-blend-mode:overlay}
+    .slide::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.42) 100%)}
+    .text-glow{text-shadow:0 0 20px rgba(var(--glow-color-rgb),.35),0 0 40px rgba(var(--glow-color-rgb),.15)}
+    .deco-shape{position:absolute;border:1px solid rgba(255,255,255,.08);border-radius:999px;opacity:.22;z-index:1}
+    .pill{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .8rem;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.05);color:#c7dcda;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+    .hero-ring{width:180px;height:180px;border-radius:999px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 30%, rgba(138,180,255,.25), transparent 55%), rgba(255,255,255,.04);box-shadow:0 0 80px rgba(102,224,210,.12);animation:float 3.6s ease-in-out infinite}
+    .hero-ring::before{content:'';width:112px;height:112px;border-radius:999px;background:radial-gradient(circle at 30% 30%, rgba(102,224,210,.9), rgba(102,224,210,.2) 55%, transparent 58%), radial-gradient(circle at 70% 70%, rgba(255,211,122,.6), transparent 40%);box-shadow:inset 0 0 24px rgba(255,255,255,.14),0 0 30px rgba(102,224,210,.25)}
+    .card{background:rgba(255,255,255,.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+    .mini{font-size:.88rem;line-height:1.45}
+    .line{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent)}
+    .quote{border-left:3px solid #66e0d2;padding-left:1rem;color:#eef7f6}
+    .speaker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+    .speaker{padding:1rem 1.1rem;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+    .reef-scene-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.6}
+    @media (max-width: 900px){.speaker-grid,.grid-3,.grid-2{grid-template-columns:1fr!important}}
+  </style>
+</head>
+<body>
+<div class="mouse-spotlight" style="position:fixed;inset:0;z-index:99;pointer-events:none;"></div>
+<canvas id="reef-scene-canvas" class="reef-scene-canvas" aria-hidden="true"></canvas>
+<div class="deck">
+
+  <div class="slide slide-1 active" data-slide="1">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:520px;height:520px;top:-120px;right:-120px;background:var(--color-accent-1);opacity:.13"></div>
+      <div class="blob" style="width:340px;height:340px;bottom:-80px;left:-40px;background:var(--color-accent-2);opacity:.12"></div>
+      <div class="blob" style="width:240px;height:240px;top:38%;left:16%;background:var(--color-accent-3);opacity:.08"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="deco-shape" data-speed="0.03" style="width:320px;height:320px;top:12%;left:8%"></div>
+    <div class="deco-shape" data-speed="0.04" style="width:220px;height:220px;right:12%;bottom:16%"></div>
+    <div class="content text-center">
+      <div class="mx-auto mb-6 hero-ring reveal"></div>
+      <h1 class="font-display text-[clamp(2.4rem,5.6vw,5rem)] leading-[0.94] tracking-tight bg-linear-to-br from-accent-1 via-accent-2 to-accent-3 bg-clip-text text-transparent mb-4 reveal">Sounding the Reef: An Immersive Art Exhibit to Share Ecosystem Restoration</h1>
+      <p class="text-[clamp(.8rem,1.1vw,.95rem)] uppercase tracking-[0.28em] text-text-muted reveal">Reefs reimagined: Art as catalyst in coral conservation</p>
+    </div>
+  </div>
+
+  <div class="slide slide-2" data-slide="2">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:380px;height:380px;top:-90px;right:-70px;background:var(--color-accent-1);opacity:.1"></div>
+      <div class="blob" style="width:300px;height:300px;bottom:-80px;left:-60px;background:var(--color-accent-2);opacity:.08"></div>
+    </div>
+    <div class="content">
+      <div class="grid grid-cols-2 gap-10 grid-2 items-center">
+        <div>
+          <div class="pill mb-4 reveal">Speaker Intro</div>
+          <h2 class="font-display text-[clamp(2rem,4vw,3rem)] mb-5 reveal">Ahoy! I am Océane, a Ph.D. candidate at SIO</h2>
+          <ul class="reveal" style="margin:0;padding-left:1.15rem;color:var(--color-text-secondary);display:grid;gap:.7rem;font-size:1.02rem;line-height:1.7;">
+            <li>I study ecoacoustics, which means I listen to ocean sounds to learn about life in the sea.</li>
+            <li>I study how fish, shrimp, and other sea animals use sound to find food, stay safe, and communicate. Sometimes I am a reef fish DJ and play back the sounds of healthy reefs to degraded reefs, helping them recover faster.</li>
+            <li>I also track how reef soundscapes are changing when humans add pressures like noise, warming waters, and habitat damage.</li>
+            <li>My North Star is to help communities and scientists work together to protect healthy ocean habitats for the next generation.</li>
+          </ul>
+        </div>
+        <div class="reveal" style="display:flex;justify-content:center;flex-direction:column;gap:.65rem;">
+          <video src="tidal_play.mov" autoplay muted loop playsinline preload="auto" controls
+            style="width:100%;max-height:62vh;object-fit:contain;object-position:center;border-radius:18px;border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 36px rgba(0,0,0,.42);background:#020b11;">
+          </video>
+          <p style="margin:0;font-size:clamp(.7rem,.95vw,.86rem);line-height:1.5;color:rgba(199,220,218,.85);font-style:italic;">
+            As scientific divers, we deploy our directional hydrophones like the one I am holding at 100 ft deep. This was in the Au'Au channel of Maui where we study humpback whale migrations.
+          </p>
+          <p style="margin:0;font-size:clamp(.64rem,.85vw,.78rem);line-height:1.4;color:rgba(199,220,218,.78);">
+            Video credit: Corinne Pickering.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-3" data-slide="3">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-80px;right:-70px;background:var(--color-accent-1);opacity:.08"></div>
+      <div class="blob" style="width:280px;height:280px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:.07"></div>
+    </div>
+    <div class="deco-shape" data-speed="0.02" style="width:240px;height:240px;top:20%;right:12%"></div>
+    <div class="content">
+      <div class="grid grid-cols-2 gap-10 grid-2 items-center">
+        <div>
+          <div class="pill mb-4 reveal">Motivation</div>
+          <p class="text-lg text-text-secondary mb-4 reveal">Inspired by our acoustic enrichment studies off the windward reefs of O&#39;ahu, Hawai&#39;i ~ we demonstrated enhanced coral recruitment and survival using acoustic enrichment, artificial reef structures, and nanoengineered biofilms.</p>
+          <p class="text-lg text-text-secondary reveal">The idea of Polypod was born from these studies, serving as a spatial and interactive installation to convey the acoustic environment of coral reefs from the "larvae perspective"</p>
+        </div>
+        <div class="reveal" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <p style="margin:0;font-size:clamp(.72rem,.8vw,.9rem);line-height:1.35;color:rgba(199,220,218,.88);text-shadow:0 1px 5px rgba(0,0,0,.7);font-family:var(--font-body);text-align:center;">
+            <em>Montipora capitata</em> · Rice Coral
+          </p>
+          <img src="shellfegio-synthesizer/mcap_uhm.jpeg" alt="M. capitata reef, UHM"
+            style="width:clamp(180px,23vw,300px);height:clamp(180px,23vw,300px);border-radius:50%;object-fit:cover;object-position:center;border:2px solid rgba(102,224,210,.45);box-shadow:0 8px 34px rgba(0,0,0,.45);display:block;">
+          <img src="shellfegio-synthesizer/polyp_pod.gif" alt="Polyp Pod field footage" style="width:100%;border-radius:16px;display:block;max-height:38vh;object-fit:cover;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-4" data-slide="4">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-60px;background:var(--color-accent-3);opacity:.08"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-60px;left:-40px;background:var(--color-accent-1);opacity:.07"></div>
+    </div>
+    <div class="content">
+      <div class="pill mb-4 reveal">Background</div>
+      <h2 class="font-display text-[clamp(2rem,4vw,3rem)] mb-8 reveal">Reef sounds are maps of habitat information</h2>
+      <div class="grid grid-cols-2 gap-6 grid-2">
+        <div class="card p-7 reveal">
+          <h3 class="font-display text-[1.65rem] mb-3">Acoustic enrichment can influence settlement</h3>
+          <p class="text-text-secondary mini">Our multi year study found that acoustic enrichment and artificial habitats influenced larvae recruitment and settlement, within 20 m of the playback source.</p>
+          <p class="text-text-secondary mini">Coral larvae actively use acoustic and vibrational cues to navigate and settle. </p>
+        </div>
+        <div class="card p-7 reveal">
+          <h3 class="font-display text-[1.65rem] mb-3">Human-Reef Connection</h3>
+          <p class="text-text-secondary mini">We exist in a deeply symbiotic relationship with our reefs as biodiversity hotspots ~ and when immersed in water - where pressure waves travel ~6x more efficiently than in air, sound is a primary sensory modality for most organisms in the ocean.</p>
+         <p class="text-text-secondary mini">It is our responsibility to understand how noise can mask and disrupt natural cues.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-5" data-slide="5">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-85px;right:-70px;background:var(--color-accent-1);opacity:.09"></div>
+      <div class="blob" style="width:280px;height:280px;bottom:-70px;left:-50px;background:var(--color-accent-2);opacity:.07"></div>
+    </div>
+    <div class="content">
+      <div class="pill mb-4 reveal">Call Type 1</div>
+      <h2 class="font-display text-[clamp(2rem,4vw,3rem)] mb-7 reveal">Pulse train call (damselfish)</h2>
+      <div class="grid grid-cols-2 gap-8 grid-2 items-center">
+        <div class="card p-4 reveal">
+          <img src="shellfegio-synthesizer/pulse_train_spec.png" alt="Pulse train spectrogram from damselfish call"
+            style="width:100%;max-height:54vh;border-radius:12px;display:block;object-fit:contain;">
+        </div>
+        <div class="card p-7 reveal" style="display:flex;flex-direction:column;gap:1rem;align-items:flex-start;">
+          <p class="text-text-secondary mini" style="font-size:1rem;line-height:1.7;">
+            This spectrogram shows a repeating pulse-train call, often heard in damselfish territories. In this view, time runs left to right, and brighter bands show where sound energy is strongest.
+          </p>
+          <img src="damselfish_silouhette.jpeg" alt="Damselfish silhouette"
+            style="width:clamp(120px,15vw,170px);height:clamp(120px,15vw,170px);border-radius:50%;object-fit:cover;object-position:center;display:block;border:1px solid rgba(199,220,218,0.35);opacity:.85;" />
+          <p style="margin:0;font-size:clamp(.65rem,.8vw,.8rem);color:rgba(199,220,218,.7);font-style:italic;">Hawaiian Damselfish</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-6" data-slide="6">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-85px;left:-70px;background:var(--color-accent-2);opacity:.08"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;right:-40px;background:var(--color-accent-1);opacity:.07"></div>
+    </div>
+    <div class="content">
+      <div class="pill mb-4 reveal">Call Type 2</div>
+      <h2 class="font-display text-[clamp(2rem,4vw,3rem)] mb-7 reveal">"Pop-pop" call (unknown reef fish)</h2>
+      <div class="grid grid-cols-2 gap-8 grid-2 items-center">
+        <div class="card p-4 reveal">
+          <img src="shellfegio-synthesizer/pop_pop_spec.png" alt="Pop-pop spectrogram from unknown reef fish"
+            style="width:100%;max-height:54vh;border-radius:12px;display:block;object-fit:contain;">
+        </div>
+        <div class="card p-7 reveal" style="display:flex;flex-direction:column;gap:1rem;align-items:flex-start;">
+          <p class="text-text-secondary mini" style="font-size:1rem;line-height:1.7;">
+            This spectrogram captures short "pop-pop" bursts from an unidentified reef fish. These calls appear as compact vertical pulses, which can help us compare species behavior and habitat sound changes over time.
+          </p>
+          <img src="unknown_fish.png" alt="Unknown reef fish"
+            style="width:100%;max-width:270px;max-height:150px;border-radius:14px;object-fit:cover;object-position:center;display:block;border:1px solid rgba(199,220,218,0.3);opacity:.85;" />
+          <p style="margin:0;font-size:clamp(.65rem,.8vw,.8rem);color:rgba(199,220,218,.7);font-style:italic;">Unknown reef fish</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-7" data-slide="7">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:420px;height:420px;top:-100px;left:-80px;background:var(--color-accent-1);opacity:.09"></div>
+      <div class="blob" style="width:300px;height:300px;bottom:-70px;right:-50px;background:var(--color-accent-2);opacity:.07"></div>
+    </div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="content">
+      <div class="grid grid-cols-2 gap-10 grid-2 items-center">
+        <!-- Left: intro text -->
+        <div>
+          <div class="pill mb-4 reveal">Meet the instrument</div>
+          <h2 class="font-display text-[clamp(2rem,4vw,3rem)] leading-tight mb-5 reveal">Shellfeggio Synthesizer</h2>
+          <p class="text-lg text-text-secondary mb-4 reveal">A modular, playful and open source interface for interacting with, creating and sharing a reef's soundscape — built so that anyone can experience and layer reef sounds from the field.</p>
+          <div class="grid grid-cols-1 gap-3 reveal">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <span style="color:var(--color-accent-1);font-size:1.1rem;flex-shrink:0;">◈</span>
+              <p class="text-text-secondary mini"><strong>Interact</strong> — touch-triggered WAV playback direct tap and looping capacity</p>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <span style="color:var(--color-accent-2);font-size:1.1rem;flex-shrink:0;">◈</span>
+              <p class="text-text-secondary mini"><strong>Create</strong> — per-slot pitch / waveform control; load any WAV to remap the soundscape in real time</p>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <span style="color:var(--color-accent-3);font-size:1.1rem;flex-shrink:0;">◈</span>
+              <p class="text-text-secondary mini"><strong>Share</strong> — web browser based with offline cache; runs on any smart phone, tablet or desktop with no install required</p>
+            </div>
+          </div>
+        </div>
+        <!-- Right: frontend screenshot plus single Shellfeggio image -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:12px;height:clamp(520px,82vh,980px);align-items:stretch;">
+          <img src="shellfegio-synthesizer/soundboard.png" alt="Shellfegio soundboard interface"
+            style="width:100%;height:100%;object-fit:contain;display:block;filter:brightness(1.5) contrast(1.1);" class="reveal">
+          <img src="shellfegio-synthesizer/imgs/nadir_top_kelp.png" alt="Shellfeggio top view with kelp"
+            style="width:100%;height:100%;object-fit:contain;object-position:center;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.35);display:block;" class="reveal">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-8" data-slide="8">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-70px;left:-40px;background:var(--color-accent-2);opacity:.08"></div>
+      <div class="blob" style="width:280px;height:280px;bottom:-70px;right:-50px;background:var(--color-accent-1);opacity:.07"></div>
+    </div>
+    <div class="deco-shape" data-speed="0.03" style="width:280px;height:280px;bottom:12%;left:10%"></div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2rem,4vw,3rem)] mb-8 reveal">Giving Our Reefs A Voice Above the Waves</h2>
+      <div class="grid grid-cols-2 gap-6 grid-2">
+        <div class="card p-7 reveal">
+          <h3 class="font-semibold text-xl mb-3">1. Touch becomes listening</h3>
+          <p class="text-text-secondary">Touch and gesture become a point of entry to reef acoustics.</p>
+        </div>
+        <div class="card p-7 reveal">
+          <h3 class="font-semibold text-xl mb-3">2. Playback becomes exploration</h3>
+          <p class="text-text-secondary">Participants explore fish choruses, shrimp snaps, and settlement cues as a responsive map.</p>
+        </div>
+        <div class="card p-7 reveal">
+          <h3 class="font-semibold text-xl mb-3">3. Modulation reveals difference</h3>
+          <p class="text-text-secondary">Modulation reveals the difference between healthy and disrupted soundscapes.</p>
+        </div>
+        <div class="card p-7 reveal">
+          <h3 class="font-semibold text-xl mb-3">4. Participation builds empathy</h3>
+          <p class="text-text-secondary">Participation links sound, habitat, and restoration.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-9" data-slide="9">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:420px;height:420px;top:-110px;left:-80px;background:var(--color-accent-2);opacity:.1"></div>
+      <div class="blob" style="width:280px;height:280px;bottom:-60px;right:-40px;background:var(--color-accent-1);opacity:.08"></div>
+      <div class="blob" style="width:220px;height:220px;top:42%;right:18%;background:var(--color-accent-3);opacity:.06"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="content text-center">
+      <div class="pill mx-auto mb-5 reveal">Conclusion</div>
+      <h2 class="font-display text-[clamp(2.2rem,5vw,4rem)] bg-linear-to-br from-accent-1 via-accent-2 to-accent-3 bg-clip-text text-transparent mb-4 reveal">Shellfeggio makes reef sound interactive, making us reef fish DJs!</h2>
+      <p class="text-[clamp(1rem,1.5vw,1.18rem)] text-text-secondary max-w-[760px] mx-auto mb-6 reveal">Polyp Pod provides the form. Shellfeggio enables human–reef exchange rooted in ecological data and participatory play.</p>
+      <div class="speaker-grid max-w-[980px] mx-auto reveal">
+        <div class="speaker"><div class="text-sm uppercase tracking-[0.18em] text-text-muted mb-2">Sharing Science Differently</div><div class="text-text-secondary mini">From acoustic enrichment field studies, settlement cues patterns, ecological acoustic data.</div></div>
+        <div class="speaker"><div class="text-sm uppercase tracking-[0.18em] text-text-muted mb-2">Accessible Interface</div><div class="text-text-secondary mini">Shellfeggio synthesizer, touch, modulation, embodied listening, participatory play.</div></div>
+        <div class="speaker"><div class="text-sm uppercase tracking-[0.18em] text-text-muted mb-2">Outcome</div><div class="text-text-secondary mini">A public encounter where restoration science is explained and activated through communal interaction.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-10" data-slide="10">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:420px;height:420px;top:-110px;right:-80px;background:var(--color-accent-1);opacity:.1"></div>
+      <div class="blob" style="width:300px;height:300px;bottom:-60px;left:-40px;background:var(--color-accent-2);opacity:.08"></div>
+      <div class="blob" style="width:220px;height:220px;top:40%;left:20%;background:var(--color-accent-3);opacity:.06"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="content" style="display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.2vh,14px);justify-content:center;">
+      <!-- Multilingual header -->
+      <h2 class="font-display text-center reveal"
+          style="margin:0;font-size:clamp(1.8rem,3.5vw,3rem);
+                 background:linear-gradient(to right,#66e0d2,#8ab4ff,#ffd37a);
+                 -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+        Thank you &nbsp;&bull;&nbsp; Mahalo
+      </h2>
+      <!-- Subheader -->
+      <p class="reveal" style="margin:0;font-size:clamp(.85rem,1.1vw,1rem);color:rgba(199,220,218,.8);font-family:var(--font-body);text-align:left;font-style:italic;">If interested in learning more about the Science behind the SciArt</p>
+      <!-- Paper citation + Affiliations side by side -->
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:clamp(8px,1vw,14px);width:100%;">
+        <img src="shellfegio-synthesizer/paper.png" alt="Scientific Reports: Autonomous cameras reveal larval reef fish responses to acoustic enrichment and lunar phase" class="reveal"
+          style="width:100%;border-radius:12px;display:block;object-fit:contain;object-position:left top;">
+        <img src="shellfegio-synthesizer/affiliations.png" alt="Co-authors, affiliations and funding partners" class="reveal"
+          style="width:100%;border-radius:12px;display:block;object-fit:contain;
+                 border:1px solid rgba(102,224,210,.2);box-shadow:0 4px 20px rgba(0,0,0,.4);">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav-controls" aria-label="Slide navigation">
+  <button class="nav-btn" onclick="changeSlide(-1)" aria-label="Previous slide">&#8249;</button>
+  <div class="slide-dots" id="dots"></div>
+  <button class="nav-btn" onclick="changeSlide(1)" aria-label="Next slide">&#8250;</button>
+  <span class="slide-counter" id="counter">1 / 10</span>
+</div>
+
+<script>
+let current = 1;
+const total = document.querySelectorAll('.slide').length;
+const dotsContainer = document.getElementById('dots');
+const counter = document.getElementById('counter');
+for (let i = 1; i <= total; i++) { const dot = document.createElement('div'); dot.className = 'dot' + (i === 1 ? ' active' : ''); dot.onclick = () => goToSlide(i); dotsContainer.appendChild(dot); }
+function goToSlide(n) { const prev = document.querySelector('.slide.active'); const next = document.querySelector(`.slide[data-slide="${n}"]`); if (prev) prev.classList.remove('active'); if (next) { next.classList.add('active'); animateSlide(next); } current = n; updateNav(); }
+function changeSlide(dir) { let next = current + dir; if (next < 1) next = total; if (next > total) next = 1; goToSlide(next); }
+function updateNav() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i + 1 === current)); counter.textContent = current + ' / ' + total; }
+updateNav();
+function syncSlideVideos() {
+  document.querySelectorAll('.slide video').forEach((video) => {
+    video.muted = true;
+    video.loop = true;
+    const inActiveSlide = video.closest('.slide')?.classList.contains('active');
+    if (inActiveSlide) {
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {});
+      }
+    } else {
+      video.pause();
+      video.currentTime = 0;
+    }
+  });
+}
+const originalGoToSlide = goToSlide;
+goToSlide = function(n) {
+  originalGoToSlide(n);
+  syncSlideVideos();
+};
+document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); } if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); } });
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => { const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1); });
+function animateSlide(slide) { slide.querySelectorAll('.reveal').forEach((el, i) => { el.style.transition = 'none'; el.style.opacity = '0'; el.style.transform = 'translateY(20px)'; el.offsetHeight; const delay = i * 0.08; el.style.transition = `opacity 0.35s ease ${delay}s, transform 0.35s ease ${delay}s`; el.style.opacity = '1'; el.style.transform = 'translateY(0px)'; }); }
+document.addEventListener('mousemove', (e) => { const spotlight = document.querySelector('.mouse-spotlight'); if (spotlight) { const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '102,224,210'; spotlight.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(${rgb}, 0.06), transparent 40%)`; } });
+(function() { let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2; const cx = window.innerWidth / 2, cy = window.innerHeight / 2; document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; }); (function tick() { const ox = (mouseX - cx) / cx, oy = (mouseY - cy) / cy; document.querySelectorAll('.deco-shape').forEach(shape => { const speed = parseFloat(shape.dataset.speed) || 0.03; shape.style.transform = `translate(${ox * speed * 100}px, ${oy * speed * 100}px)`; }); requestAnimationFrame(tick); })();})();
+window.initParticles = function(canvas, options) { if (!canvas) return; const ctx = canvas.getContext('2d'); canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; const interactive = options.interactive !== false; const count = options.count || (interactive ? 55 : 18); let mx = -1000, my = -1000; const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '102,224,210'; const [r,g,b] = rgb.split(',').map(Number); const particles = Array.from({ length: count }, () => ({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, size: Math.random() * 2.4 + 0.7, alpha: Math.random() * 0.32 + 0.08 })); if (interactive) { canvas.addEventListener('mousemove', (e) => { const rect = canvas.getBoundingClientRect(); mx = e.clientX - rect.left; my = e.clientY - rect.top; }); canvas.addEventListener('mouseleave', () => { mx = -1000; my = -1000; }); } (function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p => { if (interactive) { const dx = p.x - mx, dy = p.y - my, dist = Math.sqrt(dx * dx + dy * dy); if (dist < 120 && dist > 0) { const force = (120 - dist) / 120 * 2; p.vx += (dx / dist) * force * 0.1; p.vy += (dy / dist) * force * 0.1; } } p.vx *= 0.98; p.vy *= 0.98; p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0; if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha})`; ctx.fill(); }); requestAnimationFrame(animate); })(); };
+document.querySelectorAll('.particle-canvas').forEach(c => window.initParticles(c, { interactive: true, count: 55 }));
+document.querySelectorAll('.particle-canvas-ambient').forEach(c => window.initParticles(c, { interactive: false, count: 18 }));
+
+const reefCanvas = document.getElementById('reef-scene-canvas');
+const reefCtx = reefCanvas.getContext('2d');
+const reefFish = Array.from({ length: 44 }, (_, i) => ({
+  x: Math.random(),
+  y: 0.18 + Math.random() * 0.68,
+  s: 0.6 + Math.random() * 0.95,
+  speed: 0.00002 + Math.random() * 0.00005,
+  phase: Math.random() * Math.PI * 2,
+  dir: i % 2 === 0 ? 1 : -1
+}));
+
+function resizeReefCanvas() {
+  reefCanvas.width = window.innerWidth;
+  reefCanvas.height = window.innerHeight;
+}
+
+function drawBranchCoral(x, y, size, alpha, rotation) {
+  reefCtx.save();
+  reefCtx.translate(x, y);
+  reefCtx.rotate(rotation || 0);
+  reefCtx.globalAlpha = alpha;
+  reefCtx.strokeStyle = 'rgba(155, 205, 190, 0.5)';
+  reefCtx.lineWidth = 1.25;
+  reefCtx.lineCap = 'round';
+  const branch = (sx, sy, len, angle, depth) => {
+    if (depth === 0 || len < 5) return;
+    const ex = sx + Math.cos(angle) * len;
+    const ey = sy + Math.sin(angle) * len;
+    reefCtx.beginPath();
+    reefCtx.moveTo(sx, sy);
+    reefCtx.lineTo(ex, ey);
+    reefCtx.stroke();
+    branch(ex, ey, len * 0.7, angle + 0.52, depth - 1);
+    branch(ex, ey, len * 0.64, angle - 0.46, depth - 1);
+  };
+  branch(0, 0, size, -Math.PI / 2, 4);
+  reefCtx.restore();
+}
+
+function drawFanCoral(x, y, size, alpha, rotation) {
+  reefCtx.save();
+  reefCtx.translate(x, y);
+  reefCtx.rotate(rotation || 0);
+  reefCtx.globalAlpha = alpha;
+  reefCtx.strokeStyle = 'rgba(175, 215, 205, 0.42)';
+  reefCtx.lineWidth = 1;
+  reefCtx.beginPath();
+  reefCtx.arc(0, 0, size, -Math.PI * 0.9, -Math.PI * 0.1);
+  reefCtx.stroke();
+  for (let i = 0; i < 10; i++) {
+    const t = i / 9;
+    const a = -Math.PI * 0.9 + t * Math.PI * 0.8;
+    reefCtx.beginPath();
+    reefCtx.moveTo(0, 0);
+    reefCtx.lineTo(Math.cos(a) * size, Math.sin(a) * size);
+    reefCtx.stroke();
+  }
+  reefCtx.restore();
+}
+
+function drawRiceCoralHead(x, y, radius, alpha) {
+  reefCtx.save();
+  reefCtx.globalAlpha = alpha;
+  reefCtx.fillStyle = 'rgba(190, 230, 220, 0.16)';
+  reefCtx.strokeStyle = 'rgba(190, 230, 220, 0.35)';
+  reefCtx.lineWidth = 0.8;
+  reefCtx.beginPath();
+  reefCtx.arc(x, y, radius, 0, Math.PI * 2);
+  reefCtx.fill();
+  reefCtx.stroke();
+  const bumps = 18;
+  for (let i = 0; i < bumps; i++) {
+    const a = (i / bumps) * Math.PI * 2;
+    const ring = radius * (0.28 + (i % 4) * 0.12);
+    const bx = x + Math.cos(a) * ring;
+    const by = y + Math.sin(a) * ring;
+    const br = radius * (0.07 + (i % 3) * 0.02);
+    reefCtx.beginPath();
+    reefCtx.arc(bx, by, br, 0, Math.PI * 2);
+    reefCtx.fill();
+    reefCtx.stroke();
+  }
+  reefCtx.restore();
+}
+
+function drawFish(x, y, scale, dir, alpha) {
+  reefCtx.save();
+  reefCtx.translate(x, y);
+  reefCtx.scale(dir, 1);
+  reefCtx.globalAlpha = alpha;
+  reefCtx.fillStyle = 'rgba(180, 225, 235, 0.35)';
+  reefCtx.beginPath();
+  reefCtx.ellipse(0, 0, 9 * scale, 4.5 * scale, 0, 0, Math.PI * 2);
+  reefCtx.fill();
+  reefCtx.beginPath();
+  reefCtx.moveTo(-9 * scale, 0);
+  reefCtx.lineTo(-15 * scale, -4 * scale);
+  reefCtx.lineTo(-15 * scale, 4 * scale);
+  reefCtx.closePath();
+  reefCtx.fill();
+  reefCtx.restore();
+}
+
+function drawZenReef(ts) {
+  const w = reefCanvas.width;
+  const h = reefCanvas.height;
+  reefCtx.clearRect(0, 0, w, h);
+
+  const progress = Math.max(0, Math.min(1, (current - 1) / Math.max(1, total - 1)));
+  const coralCount = Math.floor(4 + progress * 12);
+  const fishCount = Math.floor(8 + progress * 30);
+
+  const haze = reefCtx.createLinearGradient(0, h * 0.62, 0, h);
+  haze.addColorStop(0, 'rgba(100, 170, 170, 0)');
+  haze.addColorStop(1, 'rgba(70, 125, 120, 0.12)');
+  reefCtx.fillStyle = haze;
+  reefCtx.fillRect(0, h * 0.62, w, h * 0.38);
+
+  const seabedTopBase = h * 0.83;
+  const seabedAmp = h * (0.018 + progress * 0.02);
+  const seabedYAt = (t) => seabedTopBase + Math.sin(t * Math.PI * 2.1 + 0.3) * seabedAmp + Math.sin(t * Math.PI * 5.1 + 1.1) * seabedAmp * 0.45;
+
+  reefCtx.beginPath();
+  reefCtx.moveTo(0, h);
+  for (let x = 0; x <= w; x += Math.max(8, Math.floor(w / 140))) {
+    const t = x / w;
+    reefCtx.lineTo(x, seabedYAt(t));
+  }
+  reefCtx.lineTo(w, h);
+  reefCtx.closePath();
+  const benthicGrad = reefCtx.createLinearGradient(0, seabedTopBase - h * 0.03, 0, h);
+  benthicGrad.addColorStop(0, 'rgba(140, 190, 175, 0.08)');
+  benthicGrad.addColorStop(1, 'rgba(90, 130, 120, 0.22)');
+  reefCtx.fillStyle = benthicGrad;
+  reefCtx.fill();
+
+  const rubbleCount = Math.floor(12 + progress * 24);
+  for (let i = 0; i < rubbleCount; i++) {
+    const t = (i + 0.5) / rubbleCount;
+    const x = t * w + Math.sin(i * 1.7) * 6;
+    const y = seabedYAt(t) + 5 + (i % 3) * 3;
+    const r = 1.4 + (i % 4) * 0.7;
+    reefCtx.beginPath();
+    reefCtx.fillStyle = 'rgba(186, 220, 210, 0.18)';
+    reefCtx.arc(x, y, r, 0, Math.PI * 2);
+    reefCtx.fill();
+  }
+
+  const coralAnchors = [
+    { x: 0.06, type: 'branch', r: -0.18, lift: 0 },
+    { x: 0.14, type: 'rice', r: 0, lift: 4 },
+    { x: 0.23, type: 'fan', r: -0.08, lift: 2 },
+    { x: 0.33, type: 'rice', r: 0, lift: 6 },
+    { x: 0.43, type: 'branch', r: 0.06, lift: 2 },
+    { x: 0.54, type: 'rice', r: 0, lift: 5 },
+    { x: 0.64, type: 'fan', r: 0.05, lift: 3 },
+    { x: 0.74, type: 'rice', r: 0, lift: 6 },
+    { x: 0.83, type: 'branch', r: 0.14, lift: 1 },
+    { x: 0.91, type: 'rice', r: 0, lift: 5 },
+    { x: 0.11, type: 'fan', r: -0.1, lift: 1 },
+    { x: 0.88, type: 'fan', r: 0.12, lift: 2 }
+  ];
+
+  const activeAnchors = Math.min(coralAnchors.length, coralCount);
+  for (let i = 0; i < activeAnchors; i++) {
+    const a = coralAnchors[i];
+    const x = a.x * w;
+    const y = seabedYAt(a.x) + (a.lift || 0);
+    const scale = 0.8 + progress * 0.55 + (i % 3) * 0.08;
+    const alpha = 0.08 + progress * 0.16;
+    if (a.type === 'branch') {
+      drawBranchCoral(x, y, 22 * scale, alpha, a.r);
+    } else if (a.type === 'fan') {
+      drawFanCoral(x, y, 20 * scale, alpha * 0.95, a.r);
+    } else {
+      drawRiceCoralHead(x, y, 12 * scale, alpha * 1.15);
+    }
+  }
+
+  for (let i = 0; i < fishCount; i++) {
+    const f = reefFish[i];
+    const drift = Math.sin(ts * 0.00085 + f.phase) * 8;
+    const x = ((f.x * w + ts * f.speed * w * f.dir) % (w + 80)) - 40;
+    const y = f.y * h + Math.sin(ts * 0.0013 + f.phase) * (4 + progress * 5);
+    drawFish(x, y + drift * 0.2, f.s * (0.7 + progress * 0.45), f.dir, 0.12 + progress * 0.14);
+  }
+
+  requestAnimationFrame(drawZenReef);
+}
+
+resizeReefCanvas();
+window.addEventListener('resize', resizeReefCanvas);
+requestAnimationFrame(drawZenReef);
+try { animateSlide(document.querySelector('.slide.active')); } catch(e) {}
+try { syncSlideVideos(); } catch(e) {}
+</script>
+</body>
+</html>
