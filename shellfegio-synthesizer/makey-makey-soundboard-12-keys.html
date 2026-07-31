@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Shellfegio Synthesizer 12 Keys</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#01696f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Shellfegio">
+  <link rel="apple-touch-icon" href="imgs/main_front.png">
+  <style>
+    :root {
+      --bg: #040b15;
+      --surface: #071525;
+      --surface-2: #0c1e32;
+      --text: #deedf5;
+      --muted: #5e8fa0;
+      --line: rgba(222,237,245,.1);
+      --primary: #00cdd2;
+      --primary-2: #009ea3;
+      --danger: #ff5a7a;
+      --shadow: 0 12px 30px rgba(0,0,0,.45);
+      --radius: 18px;
+      --tap: 48px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); }
+    body { padding: 16px; }
+    .app { max-width: 1080px; margin: 0 auto; display: grid; gap: 16px; }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+    h1, h2, p { margin: 0; }
+    h1 { font-size: clamp(1.6rem, 1.2rem + 2vw, 2.4rem); line-height: 1.1; }
+    h2 { font-size: 1rem; margin-bottom: 10px; }
+    .lede { color: var(--muted); margin-top: 8px; max-width: 70ch; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .button, label.button {
+      min-height: var(--tap); display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2);
+      color: var(--text); font-weight: 600; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation;
+    }
+    .button.primary { background: var(--primary); color: #fff; border-color: transparent; }
+    .button.primary:active { background: var(--primary-2); }
+    .button.danger { background: rgba(255,90,122,.12); color: var(--danger); }
+    .button input { display: none; }
+    .status { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+    .pill { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; min-height: 74px; }
+    .pill strong { display: block; font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+    .slot { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px; display: grid; gap: 10px; }
+    .slot.active { outline: 2px solid rgba(0,205,210,.5); outline-offset: 1px; }
+    .slot-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .key-badge { min-width: 78px; min-height: 42px; display:inline-flex; align-items:center; justify-content:center; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); font-weight: 800; }
+    .slot-name { font-weight: 700; }
+    .meta { font-size: .9rem; color: var(--muted); word-break: break-word; }
+    .input { width: 100%; min-height: 46px; border-radius: 12px; border: 1px solid var(--line); padding: 10px 12px; background: var(--surface); color: var(--text); }
+    .small { font-size: .88rem; color: var(--muted); }
+    .hint { font-size: .9rem; color: var(--muted); }
+    .good { color: #4ade80; }
+    .warn { color: #fbbf24; }
+    .pad { min-height: 100px; border: 2px dashed var(--line); border-radius: 16px; display: grid; place-items: center; text-align: center; padding: 16px; background: var(--surface-2); }
+    .pad.active { border-color: var(--primary); background: rgba(0,205,210,.1); }
+    code { background: var(--surface-2); padding: 2px 6px; border-radius: 8px; }
+    .pitch-details summary { cursor: pointer; font-size: .88rem; font-weight: 600; color: var(--primary); padding: 4px 0; user-select: none; -webkit-user-select: none; list-style: none; }
+    .pitch-details summary::-webkit-details-marker { display: none; }
+    .pitch-details summary::marker { display: none; }
+    .pitch-details summary::before { content: '▶\00a0'; font-size: .7em; }
+    .pitch-details[open] summary::before { content: '▼\00a0'; }
+    .pitch-panel { display: grid; gap: 8px; padding-top: 8px; }
+    .pitch-label { display: flex; align-items: center; justify-content: space-between; font-size: .82rem; }
+    .waveform-canvas { width: 100%; height: 64px; border-radius: 8px; border: 1px solid var(--line); cursor: crosshair; background: var(--surface-2); touch-action: none; display: block; }
+    @media (max-width: 640px) { body { padding: 12px; } .panel { padding: 14px; } }
+    @keyframes pulse-unlock { 0%,100%{box-shadow:0 0 0 0 rgba(0,205,210,.7)} 60%{box-shadow:0 0 0 14px rgba(0,205,210,0)} }
+    .pulse-unlock { animation: pulse-unlock 0.55s ease 4; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="panel">
+      <h1>Shellfegio Synthesizer 12-key soundboard</h1>
+      <p class="lede">This version uses 12 mapped controls: the Left key toggles looper mode, then Right, Up, Down, Space, Click, W, A, S, D, F, and G can be latched into looping playback until Left is pressed again.</p>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <button class="button primary" id="unlockBtn" type="button">Enable audio</button>
+        <label class="button" for="folderInput">Load up to 12 WAV files<input id="folderInput" type="file" accept=".wav,audio/wav" multiple></label>
+        <button class="button danger" id="stopAllBtn" type="button">Stop all</button>
+      </div>
+      <p class="lede">Load files in this order: looper control, Right, Up, Down, Space, Click, W, A, S, D, F, G.</p>
+    </section>
+
+    <section class="panel status">
+      <div class="pill"><strong>Input mode</strong><span id="inputMode">Arrows, space, click, and W A S D F G</span></div>
+      <div class="pill"><strong>Audio</strong><span id="audioState">Locked until first tap</span></div>
+      <div class="pill"><strong>Loaded slots</strong><span id="loadedCount">0 / 12</span></div>
+      <div class="pill"><strong>Held inputs</strong><span id="heldKeys">None</span></div>
+    </section>
+
+    <section class="panel">
+      <h2>Mapped sound slots</h2>
+      <p class="lede">Arrow keys, space, and letter keys respond from keyboard events. The Left arrow toggles loop-latch mode. Click responds from the hold pad below.</p>
+      <div class="grid" id="slots"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Click trigger pad</h2>
+      <div class="pad" id="clickPad" tabindex="0" role="button" aria-label="Hold to trigger click sound">
+        Press and hold here to trigger the Click slot.<br>Release to stop.
+      </div>
+      <p class="hint" style="margin-top:10px;">Keyboard mappings use standard browser key values such as <code>ArrowLeft</code> and printable keys like <code>w</code>, <code>a</code>, <code>s</code>, <code>d</code>, <code>f</code>, and <code>g</code>.</p>
+    </section>
+  </main>
+
+  <script>
+    const KEY_LAYOUT = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','click','w','a','s','d','f','g'];
+    const KEY_LABELS = {
+      ArrowLeft: 'Looper',
+      ArrowRight: 'Right',
+      ArrowUp: 'Up',
+      ArrowDown: 'Down',
+      ' ': 'Space',
+      click: 'Click',
+      w: 'W',
+      a: 'A',
+      s: 'S',
+      d: 'D',
+      f: 'F',
+      g: 'G'
+    };
+
+    // Default sounds mapped to each key slot in KEY_LAYOUT order
+    const DEFAULT_SOUNDS = [
+      { src: 'sounds/Duck_call/soundsampAnalogData-10MAR2025-1038_VS-209sensor-rot.wav_20250310T103936_1.0x.wav',   label: 'Looper control' },
+      { src: 'sounds/Good_Purrs/soundsampDA23A1T20230819T000000.gsi_20230819T181145_1.0x.wav',                      label: 'Reef Fish – Good Purrs' },
+      { src: 'sounds/Louderboat_fish/soundsampDA23A1T20230819T000000.gsi_20230819T163355_1.0x.wav',                 label: 'Reef Fish – Louderboat Fish' },
+      { src: 'sounds/low_tone/soundsampAnalogData-20MAR2025-0927_VS-209sensor-rot.wav_20250320T092759_1.0x.wav',     label: 'Humpback Whale – Low Tone' },
+      { src: 'sounds/Pulse_Pulse_boat/soundsampDA23A0T20230717T000000.gsi_20230717T080005_1.0x.wav',                label: 'Reef Fish – Pulse Pulse Boat' },
+      { src: 'sounds/Pulse_train3/soundsampDA23A0T20230717T000000.gsi_20230717T000117_1.0x.wav',                    label: 'Reef Fish – Pulse Train' },
+      { src: 'sounds/Purrr/soundsampDA23A0T20230717T000000.gsi_20230717T050302_1.0x.wav',                           label: 'Reef Fish – Purrr' },
+      { src: 'sounds/Shrimp_fish/soundsampAnalogData-06JUN2024-1456_VS-209sensor.wav_20240606T145828_1.0x.wav',     label: 'Reef Fish – Shrimp Fish' },
+      { src: 'sounds/big_WHOOP/soundsampAnalogData-20MAR2025-0927_VS-209sensor-rot.wav_20250320T093148_1.0x.wav',   label: 'Humpback Whale – Big Whoop' },
+      { src: 'sounds/poppinh_pulse/soundsampDA23A1T20230817T000000.gsi_20230817T052109_1.0x.wav',                   label: 'Reef Fish – Poppinh Pulse' },
+      { src: 'sounds/falling_tone/soundsampAnalogData-20MAR2025-0927_VS-209sensor-rot.wav_20250320T092710_1.0x.wav', label: 'Humpback Whale – Falling Tone' },
+      { src: 'sounds/flutey/soundsampAnalogData-20MAR2025-0927_VS-209sensor-rot.wav_20250320T093041_1.0x.wav',        label: 'Humpback Whale – Flutey' },
+    ];
+
+    const state = { audioContext: null, unlocked: false, slots: [], activeKeys: new Set(), voices: new Map(), looperMode: false, _voicesAtBlur: null };
+    const els = {
+      slots: document.getElementById('slots'),
+      folderInput: document.getElementById('folderInput'),
+      unlockBtn: document.getElementById('unlockBtn'),
+      stopAllBtn: document.getElementById('stopAllBtn'),
+      audioState: document.getElementById('audioState'),
+      loadedCount: document.getElementById('loadedCount'),
+      heldKeys: document.getElementById('heldKeys'),
+      inputMode: document.getElementById('inputMode'),
+      clickPad: document.getElementById('clickPad')
+    };
+
+    function makeSlot(key, index) {
+      return { key, index, name: `Slot ${index + 1}`, fileName: 'No file loaded', buffer: null, element: null, statusEl: null, fileEl: null, gainEl: null, canvasEl: null, pitchDisplayEl: null, volume: 1, playbackRate: 1 };
+    }
+
+    function getLooperSlot() {
+      return state.slots.find(slot => slot.key === 'ArrowLeft');
+    }
+
+    function refreshLooperUi() {
+      const slot = getLooperSlot();
+      if (!slot || !slot.element) return;
+      slot.element.classList.toggle('active', state.looperMode);
+      if (slot.statusEl) slot.statusEl.textContent = state.looperMode ? 'Looper armed' : 'Looper off';
+      if (slot.fileEl) slot.fileEl.textContent = 'Looper control';
+      els.inputMode.textContent = state.looperMode ? 'Looper armed: press Left again to stop latched loops' : 'Left toggles loop-latch mode; other keys can be held normally';
+    }
+
+    function stopLatchedVoices() {
+      [...state.voices.keys()].forEach(key => {
+        const voice = state.voices.get(key);
+        if (voice?.latched) stopSlotByKey(key, true);
+      });
+    }
+
+    function setLooperMode(enabled) {
+      state.looperMode = Boolean(enabled);
+      if (!state.looperMode) stopLatchedVoices();
+      refreshLooperUi();
+    }
+
+    function ensureAudioContext() {
+      if (!state.audioContext) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        state.audioContext = new AC();
+      }
+      return state.audioContext;
+    }
+
+    async function unlockAudio() {
+      const ctx = ensureAudioContext();
+      if (ctx.state !== 'running') await ctx.resume();
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+      state.unlocked = true;
+      els.audioState.textContent = 'Ready';
+      els.audioState.className = 'good';
+      // Replay any keys already held by Makey Makey — critical for iPhone + external HID workflow
+      state.activeKeys.forEach(key => {
+        const slot = state.slots.find(s => s.key === key);
+        if (slot && !state.voices.has(key)) playSlot(slot);
+      });
+    }
+
+    // Synchronous unlock — MUST be called directly inside a user-gesture handler
+    // (never after an await). iOS Safari discards the gesture context the moment
+    // async code runs, so ctx.resume() would be silently rejected otherwise.
+    // NOTE: on iOS, keydown events from external HID devices (Makey Makey) are NOT
+    // trusted gestures — ctx.resume() will be silently rejected. The user must tap
+    // "Enable audio" with their finger first; unlockAudio() will then replay held keys.
+    function unlockAudioSync() {
+      if (state.unlocked) return;
+      try {
+        const ctx = ensureAudioContext();
+        ctx.resume(); // intentionally not awaited
+        const buf = ctx.createBuffer(1, 1, 22050);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.connect(ctx.destination);
+        src.start(0);
+        state.unlocked = true;
+        els.audioState.textContent = 'Ready';
+        els.audioState.className = 'good';
+        // On desktop/Android the context is running synchronously — replay held keys
+        if (ctx.state === 'running') {
+          state.activeKeys.forEach(key => {
+            const slot = state.slots.find(s => s.key === key);
+            if (slot && !state.voices.has(key)) playSlot(slot);
+          });
+        }
+      } catch {}
+    }
+
+    function updateLoadedCount() {
+      const loaded = state.slots.filter(slot => slot.buffer).length;
+      els.loadedCount.textContent = `${loaded} / ${state.slots.length}`;
+    }
+
+    function updateHeldKeys() {
+      els.heldKeys.textContent = state.activeKeys.size ? [...state.activeKeys].map(key => KEY_LABELS[key] || key).join(', ') : 'None';
+    }
+
+    function renderSlots() {
+      els.slots.innerHTML = '';
+      state.slots.forEach(slot => {
+        const isLooper = slot.key === 'ArrowLeft';
+        const article = document.createElement('article');
+        article.className = 'slot';
+        article.innerHTML = `
+          <div class="slot-top">
+            <div>
+              <div class="slot-name">${isLooper ? 'Looper control' : slot.name}</div>
+              <div class="meta" data-role="filename">${isLooper ? 'Toggle loop-latch mode for the other keys' : slot.fileName}</div>
+            </div>
+            <div class="key-badge">${KEY_LABELS[slot.key] || slot.key}</div>
+          </div>
+          <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:.82rem;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);min-height:36px;">
+            &#128193; Change file
+            <input type="file" accept=".wav,audio/wav" style="display:none">
+          </label>
+          <button data-role="test-btn" type="button" style="font-size:.82rem;font-weight:600;padding:6px 14px;border-radius:8px;border:1px solid var(--primary);background:rgba(0,205,210,.12);color:var(--primary);cursor:pointer;font-family:var(--font);min-height:36px;touch-action:manipulation;user-select:none;-webkit-user-select:none;">${isLooper ? 'Toggle looper' : '&#9654; Hold to test'}</button>
+          <label class="small">Volume
+            <input class="input" type="range" min="0" max="1.5" step="0.01" value="1">
+          </label>
+          <details class="pitch-details">
+            <summary>&#127929; Pitch / Waveform</summary>
+            <div class="pitch-panel">
+              <div class="pitch-label">
+                <span data-role="pitch-display">1.00&times; (0.0 st)</span>
+                <button data-role="pitch-reset" type="button" style="font-size:.75rem;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;font-family:var(--font);">Reset</button>
+              </div>
+              <canvas data-role="waveform" class="waveform-canvas" height="64"></canvas>
+              <div style="text-align:center;font-size:.75rem;color:var(--muted);">&#8592; lower pitch &nbsp;&middot;&nbsp; drag to set pitch &nbsp;&middot;&nbsp; higher pitch &#8594;</div>
+            </div>
+          </details>
+          <div class="small">Status: <span>${isLooper ? 'Looper off' : 'Idle'}</span></div>
+        `;
+        const fileEl = article.querySelector('[data-role="filename"]');
+        const gainEl = article.querySelector('input[type="range"]');
+        const slotFileInput = article.querySelector('input[type="file"]');
+        const statusEl = article.querySelector('span');
+        const canvas = article.querySelector('[data-role="waveform"]');
+        const pitchDisplayEl = article.querySelector('[data-role="pitch-display"]');
+        slotFileInput.addEventListener('change', async event => {
+          const file = event.target.files?.[0];
+          if (file) await loadSlotFile(slot, file);
+          event.target.value = '';
+        });
+        gainEl.addEventListener('input', () => {
+          slot.volume = Number(gainEl.value);
+          const voice = state.voices.get(slot.key);
+          if (voice) voice.gain.gain.setTargetAtTime(slot.volume, ensureAudioContext().currentTime, 0.02);
+        });
+        article.querySelector('[data-role="pitch-reset"]').addEventListener('click', () => setPitch(slot, 1));
+        article.querySelector('.pitch-details').addEventListener('toggle', () => drawWaveform(slot));
+        const testBtn = article.querySelector('[data-role="test-btn"]');
+        if (isLooper) {
+          testBtn.addEventListener('pointerdown', ev => {
+            ev.preventDefault();
+            unlockAudioSync();
+            setLooperMode(!state.looperMode);
+          }, { passive: false });
+        } else {
+          // touchstart fires ~1 ms before pointerdown on iOS — kick the resume
+          // process early so the context has maximum time to reach 'running'.
+          testBtn.addEventListener('touchstart', ev => {
+            ev.preventDefault();
+            ensureAudioContext().resume().catch(() => {});
+          }, { passive: false });
+          // pointerdown fires for both mouse and touch on all modern browsers.
+          // ctx.resume() is called synchronously here — that satisfies Safari's
+          // "trusted user gesture" requirement for AudioContext unlock. Actual
+          // playback is deferred to the .then() so it only runs once the context
+          // is genuinely running, which fixes Safari's async-resume race condition.
+          testBtn.addEventListener('pointerdown', ev => {
+            ev.preventDefault();
+            const ctx = ensureAudioContext();
+            ctx.resume()
+              .then(() => {
+                state.unlocked = true;
+                els.audioState.textContent = 'Ready';
+                els.audioState.className = 'good';
+                playSlot(slot);
+              })
+              .catch(() => {});
+          }, { passive: false });
+          ['pointerup','pointercancel','touchend','touchcancel'].forEach(t => testBtn.addEventListener(t, () => stopSlotByKey(slot.key)));
+        }
+        let pitchDragging = false;
+        const onPitchInput = ev => {
+          const rect = canvas.getBoundingClientRect();
+          const x = (ev.clientX ?? ev.touches?.[0]?.clientX ?? 0) - rect.left;
+          setPitch(slot, Math.pow(2, 4 * (Math.max(0, Math.min(1, x / rect.width)) - 0.5)));
+        };
+        canvas.addEventListener('pointerdown', ev => { pitchDragging = true; canvas.setPointerCapture(ev.pointerId); onPitchInput(ev); });
+        canvas.addEventListener('pointermove', ev => { if (pitchDragging) onPitchInput(ev); });
+        canvas.addEventListener('pointerup', () => { pitchDragging = false; });
+        canvas.addEventListener('pointercancel', () => { pitchDragging = false; });
+        new ResizeObserver(() => drawWaveform(slot)).observe(canvas);
+        slot.element = article;
+        slot.fileEl = fileEl;
+        slot.gainEl = gainEl;
+        slot.statusEl = statusEl;
+        slot.canvasEl = canvas;
+        slot.pitchDisplayEl = pitchDisplayEl;
+        els.slots.appendChild(article);
+      });
+      updateLoadedCount();
+    }
+
+    async function decodeFile(file) {
+      const ctx = ensureAudioContext();
+      const arrayBuffer = await file.arrayBuffer();
+      return await ctx.decodeAudioData(arrayBuffer.slice(0));
+    }
+
+    async function loadSlotFile(slot, file) {
+      slot.statusEl.textContent = 'Loading\u2026';
+      slot.fileEl.textContent = file.name;
+      try {
+        slot.buffer = await decodeFile(file);
+        slot.fileName = file.name;
+        slot.statusEl.textContent = 'Ready';
+        slot.fileEl.textContent = file.name;
+      } catch {
+        slot.buffer = null;
+        slot.fileName = `${file.name} (failed)`;
+        slot.statusEl.textContent = 'Could not decode';
+        slot.fileEl.textContent = slot.fileName;
+      }
+      updateLoadedCount();
+      drawWaveform(slot);
+    }
+
+    async function loadDefaultSounds() {
+      await Promise.all(DEFAULT_SOUNDS.map(async (def, i) => {
+        const slot = state.slots[i];
+        if (!slot || !def) return;
+        slot.statusEl.textContent = slot.key === 'ArrowLeft' ? 'Loading looper control\u2026' : 'Loading default\u2026';
+        slot.fileEl.textContent = slot.key === 'ArrowLeft' ? 'Looper control' : def.label;
+        try {
+          const encodedSrc = def.src.split('/').map(s => encodeURIComponent(s)).join('/');
+          const response = await fetch(encodedSrc, { cache: 'reload' });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const arrayBuffer = await response.arrayBuffer();
+          const ctx = ensureAudioContext();
+          slot.buffer = await ctx.decodeAudioData(arrayBuffer);
+          slot.fileName = slot.key === 'ArrowLeft' ? 'Looper control' : def.label;
+          slot.fileEl.textContent = slot.fileName;
+          slot.statusEl.textContent = slot.key === 'ArrowLeft' ? (state.looperMode ? 'Looper armed' : 'Looper off') : 'Ready';
+        } catch {
+          slot.statusEl.textContent = slot.key === 'ArrowLeft' ? 'Looper unavailable' : 'Default unavailable';
+          slot.fileEl.textContent = slot.key === 'ArrowLeft' ? 'Looper control (not loaded)' : def.label + ' (not loaded)';
+        }
+        if (slot.key === 'ArrowLeft') refreshLooperUi();
+        updateLoadedCount();
+        drawWaveform(slot);
+      }));
+    }
+
+    function drawWaveform(slot) {
+      const canvas = slot.canvasEl;
+      if (!canvas) return;
+      const w = canvas.clientWidth;
+      if (!w) return;
+      const dpr = window.devicePixelRatio || 1;
+      const h = 64;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      const c = canvas.getContext('2d');
+      c.scale(dpr, dpr);
+      c.fillStyle = '#0c1e32';
+      c.fillRect(0, 0, w, h);
+      if (slot.buffer) {
+        const data = slot.buffer.getChannelData(0);
+        const step = Math.max(1, Math.floor(data.length / w));
+        const mid = h / 2;
+        c.beginPath();
+        c.strokeStyle = '#00cdd2';
+        c.lineWidth = 1.5;
+        for (let x = 0; x < w; x++) {
+          let mn = 1, mx = -1;
+          for (let j = 0; j < step; j++) {
+            const v = data[x * step + j] ?? 0;
+            if (v < mn) mn = v;
+            if (v > mx) mx = v;
+          }
+          c.moveTo(x + 0.5, mid + mn * mid * 0.9);
+          c.lineTo(x + 0.5, mid + mx * mid * 0.9);
+        }
+        c.stroke();
+      } else {
+        c.fillStyle = '#5e8fa0';
+        c.font = '12px monospace';
+        c.textAlign = 'center';
+        c.fillText('No audio loaded', w / 2, h / 2 + 5);
+      }
+      // dashed center line (1× reference)
+      c.beginPath();
+      c.strokeStyle = 'rgba(222,237,245,0.2)';
+      c.lineWidth = 1;
+      c.setLineDash([4, 4]);
+      c.moveTo(w / 2, 0);
+      c.lineTo(w / 2, h);
+      c.stroke();
+      c.setLineDash([]);
+      // pitch marker
+      const markerX = (Math.log2(slot.playbackRate) / 4 + 0.5) * w;
+      c.beginPath();
+      c.strokeStyle = '#ff5a7a';
+      c.lineWidth = 2;
+      c.moveTo(markerX, 0);
+      c.lineTo(markerX, h);
+      c.stroke();
+    }
+
+    function setPitch(slot, rate) {
+      slot.playbackRate = Math.max(0.25, Math.min(4, rate));
+      const st = Math.log2(slot.playbackRate) * 12;
+      slot.pitchDisplayEl.textContent = `${slot.playbackRate.toFixed(2)}\u00d7 (${st >= 0 ? '+' : ''}${st.toFixed(1)} st)`;
+      const voice = state.voices.get(slot.key);
+      if (voice) voice.source.playbackRate.setTargetAtTime(slot.playbackRate, ensureAudioContext().currentTime, 0.02);
+      drawWaveform(slot);
+    }
+
+    async function loadFiles(files) {
+      const wavFiles = [...files].filter(file => /\.wav$/i.test(file.name)).slice(0, state.slots.length);
+      state.slots.forEach(slot => {
+        slot.buffer = null;
+        slot.fileName = 'No file loaded';
+        slot.statusEl.textContent = 'Idle';
+        slot.fileEl.textContent = slot.fileName;
+      });
+      for (let i = 0; i < wavFiles.length; i += 1) {
+        const file = wavFiles[i];
+        const slot = state.slots[i];
+        slot.statusEl.textContent = 'Loading…';
+        slot.fileEl.textContent = file.name;
+        try {
+          slot.buffer = await decodeFile(file);
+          slot.fileName = file.name;
+          slot.statusEl.textContent = 'Ready';
+          slot.fileEl.textContent = file.name;
+        } catch {
+          slot.buffer = null;
+          slot.fileName = `${file.name} (failed)`;
+          slot.statusEl.textContent = 'Could not decode';
+          slot.fileEl.textContent = slot.fileName;
+        }
+      }
+      updateLoadedCount();
+    }
+
+    function playSlot(slot) {
+      // No buffer yet — give feedback so the user knows the file is still loading
+      if (!slot?.buffer) {
+        if (slot) slot.statusEl.textContent = slot.fileName === 'No file loaded' ? 'No file' : 'Still loading…';
+        return;
+      }
+      if (slot.key === 'ArrowLeft') return;
+      if (state.voices.has(slot.key)) return;
+      const ctx = ensureAudioContext();
+      // On iOS, external keyboard events (Makey Makey) cannot unlock the AudioContext.
+      // If the context is still suspended, pulse the Enable audio button so the user
+      // knows to tap it with their finger first — unlockAudio() will replay held keys.
+      if (ctx.state !== 'running') {
+        els.audioState.textContent = 'Tap “Enable audio” ↑';
+        els.audioState.className = 'warn';
+        els.unlockBtn.classList.remove('pulse-unlock');
+        void els.unlockBtn.offsetWidth; // force reflow so animation restarts
+        els.unlockBtn.classList.add('pulse-unlock');
+        return;
+      }
+      const source = ctx.createBufferSource();
+      const gain = ctx.createGain();
+      source.buffer = slot.buffer;
+      source.loop = true;
+      source.playbackRate.value = slot.playbackRate;
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(slot.volume, ctx.currentTime + 0.015);
+      source.connect(gain).connect(ctx.destination);
+      source.start();
+      state.voices.set(slot.key, { source, gain, slot, latched: state.looperMode });
+      slot.element.classList.add('active');
+      slot.statusEl.textContent = 'Playing';
+      if (slot.key === 'click') els.clickPad.classList.add('active');
+    }
+
+    function stopSlotByKey(key, force = false) {
+      const voice = state.voices.get(key);
+      if (!voice) return;
+      if (voice.latched && state.looperMode && !force) return;
+      const { source, gain, slot } = voice;
+      const ctx = ensureAudioContext();
+      const now = ctx.currentTime;
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.linearRampToValueAtTime(0.0001, now + 0.05);
+      source.stop(now + 0.06);
+      source.onended = () => {
+        slot.element.classList.remove('active');
+        slot.statusEl.textContent = slot.buffer ? 'Ready' : 'Idle';
+        if (key === 'click') els.clickPad.classList.remove('active');
+      };
+      state.voices.delete(key);
+    }
+
+    function stopAll() {
+      setLooperMode(false);
+      [...state.voices.keys()].forEach(key => stopSlotByKey(key, true));
+      state.activeKeys.clear();
+      updateHeldKeys();
+      els.clickPad.classList.remove('active');
+    }
+
+    function handlePress(key) {
+      // Unlock synchronously — must happen before any await (iOS Safari requirement)
+      unlockAudioSync();
+      const normalized = key === 'Spacebar' ? ' ' : (key.length === 1 ? key.toLowerCase() : key);
+      if (!KEY_LAYOUT.includes(normalized) || state.activeKeys.has(normalized)) return;
+      state.activeKeys.add(normalized);
+      updateHeldKeys();
+      if (normalized === 'ArrowLeft') {
+        setLooperMode(!state.looperMode);
+        return;
+      }
+      const slot = state.slots.find(item => item.key === normalized);
+      playSlot(slot);
+    }
+
+    function handleRelease(key) {
+      const normalized = key === 'Spacebar' ? ' ' : (key.length === 1 ? key.toLowerCase() : key);
+      if (!state.activeKeys.has(normalized)) return;
+      state.activeKeys.delete(normalized);
+      updateHeldKeys();
+      if (normalized === 'ArrowLeft') return;
+      stopSlotByKey(normalized);
+    }
+
+    function bindEvents() {
+      ['click', 'touchend', 'mouseup', 'keydown'].forEach(type => {
+        window.addEventListener(type, () => { unlockAudioSync(); }, { passive: true, once: true });
+      });
+
+      window.addEventListener('keydown', event => {
+        if (event.repeat) return;
+        if (event.target && ['INPUT','TEXTAREA'].includes(event.target.tagName)) return;
+        const key = event.key === 'Spacebar' ? ' ' : event.key;
+        if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(key)) event.preventDefault();
+        handlePress(key);
+      });
+
+      window.addEventListener('keyup', event => {
+        if (event.target && ['INPUT','TEXTAREA'].includes(event.target.tagName)) return;
+        const key = event.key === 'Spacebar' ? ' ' : event.key;
+        if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(key)) event.preventDefault();
+        handleRelease(key);
+      });
+
+      const pressClick = () => { handlePress('click'); };
+      const releaseClick = () => { handleRelease('click'); };
+      ['pointerdown','mousedown','touchstart'].forEach(type => els.clickPad.addEventListener(type, pressClick));
+      ['pointerup','pointercancel','mouseup','mouseleave','touchend','touchcancel','blur'].forEach(type => els.clickPad.addEventListener(type, releaseClick));
+      els.clickPad.addEventListener('keydown', event => {
+        if (event.repeat) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handlePress('click');
+        }
+      });
+      els.clickPad.addEventListener('keyup', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleRelease('click');
+        }
+      });
+
+      // Global mouse handlers for Makey Makey "click" input.
+      // MM sends mousedown/mouseup to wherever the cursor happens to land — not
+      // necessarily the clickPad — so we catch it at the document level instead.
+      document.addEventListener('mousedown', ev => {
+        if (ev.target.closest('button, input, label, select, a, canvas, details')) return;
+        unlockAudioSync();
+        handlePress('click');
+      });
+      document.addEventListener('mouseup', ev => {
+        if (ev.target.closest('button, input, label, select, a, canvas, details')) return;
+        handleRelease('click');
+      });
+
+      // On blur: sounds keep looping so a performance isn't interrupted when focus briefly
+      // moves to another window. activeKeys is cleared so the guard in handlePress resets.
+      // On focus return: stop any voices that were still playing from before the blur —
+      // their keyup events were missed while the window was unfocused (OS never delivers
+      // keyup to an unfocused window), so they would loop forever without this cleanup.
+      window.addEventListener('blur', () => {
+        state._voicesAtBlur = new Set(state.voices.keys());
+        state.activeKeys.clear();
+        updateHeldKeys();
+        els.clickPad.classList.remove('active');
+      });
+      window.addEventListener('focus', () => {
+        if (state._voicesAtBlur) {
+          state._voicesAtBlur.forEach(key => stopSlotByKey(key));
+          state._voicesAtBlur = null;
+        }
+      });
+      document.addEventListener('visibilitychange', () => { if (document.hidden) stopAll(); });
+      els.folderInput.addEventListener('change', async event => { if (event.target.files?.length) await loadFiles(event.target.files); });
+      els.unlockBtn.addEventListener('click', async () => {
+        try { await unlockAudio(); }
+        catch { els.audioState.textContent = 'Could not unlock audio'; els.audioState.className = 'warn'; }
+      });
+      els.stopAllBtn.addEventListener('click', stopAll);
+    }
+
+    function init() {
+      state.slots = KEY_LAYOUT.map(makeSlot);
+      renderSlots();
+      bindEvents();
+      loadDefaultSounds();
+    }
+
+    init();
+
+    // Register service worker for offline / PWA support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
