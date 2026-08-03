@@ -20,6 +20,7 @@
     }
 
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: "DM Sans", sans-serif;
@@ -30,12 +31,25 @@
         linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 45%, #02070d 100%);
       min-height: 100vh;
       line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    #ocean-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.9;
     }
 
     .container {
       width: min(1100px, 92vw);
       margin: 0 auto;
       padding: 2rem 0 4rem;
+      position: relative;
+      z-index: 2;
     }
 
     .topbar {
@@ -50,6 +64,7 @@
       background: rgba(255, 255, 255, 0.02);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
     }
 
     .eyebrow {
@@ -74,6 +89,12 @@
 
     .hero {
       padding: 1.5rem 0 2rem;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: rgba(4, 16, 28, 0.42);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding-inline: clamp(1rem, 2vw, 1.6rem);
     }
 
     h1 {
@@ -95,7 +116,9 @@
       border: 1px solid var(--border);
       border-radius: 18px;
       padding: clamp(1.1rem, 2vw, 1.7rem);
-      background: var(--card);
+      background: rgba(4, 16, 28, 0.42);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
 
     .mission-card h2,
@@ -133,7 +156,9 @@
       border: 1px solid var(--border);
       border-radius: 18px;
       padding: clamp(1.1rem, 2vw, 1.7rem);
-      background: var(--card);
+      background: rgba(4, 16, 28, 0.42);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
 
     .gallery p {
@@ -162,7 +187,9 @@
       border: 1px solid rgba(0, 205, 210, 0.3);
       border-radius: 18px;
       padding: 1.3rem;
-      background: rgba(0, 205, 210, 0.05);
+      background: rgba(0, 205, 210, 0.08);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
 
     .support-wrap h3 {
@@ -200,16 +227,26 @@
     }
 
     @media (max-width: 820px) {
+      .container {
+        width: min(1100px, 94vw);
+        padding-top: 1rem;
+      }
       .pillars {
         grid-template-columns: 1fr;
       }
       .gallery-grid {
         grid-template-columns: 1fr;
       }
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        border-radius: 18px;
+      }
     }
   </style>
 </head>
 <body>
+  <canvas id="ocean-canvas" aria-hidden="true"></canvas>
   <main class="container">
     <div class="topbar">
       <p class="eyebrow">CollectivSea · Main Mission</p>
@@ -250,8 +287,204 @@
       <p>
         A playful reef-fish DJ instrument built from shell forms, experimental sound, and ocean-inspired design. Learn how the project translates marine listening into a tactile sci-art experience.
       </p>
-      <a class="support-cta" href="ICRS_2026_talk.html">Learn More</a>
+      <a class="support-cta" href="shellfeggio_sciart_Talk_oeb.html">Learn More</a>
     </section>
   </main>
+  <script>
+    const canvas = document.getElementById('ocean-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let cw = 0;
+    let ch = 0;
+    let scrollProgress = 0;
+
+    const fish = Array.from({ length: 70 }, (_, i) => ({
+      x: Math.random(),
+      y: 0.12 + Math.random() * 0.78,
+      s: 0.45 + Math.random() * 0.9,
+      speed: 0.000018 + Math.random() * 0.00004,
+      wobble: 0.0006 + Math.random() * 0.001,
+      phase: Math.random() * Math.PI * 2,
+      dir: i % 2 === 0 ? 1 : -1
+    }));
+
+    function resizeCanvas() {
+      cw = canvas.width = window.innerWidth;
+      ch = canvas.height = window.innerHeight;
+    }
+
+    function updateScrollProgress() {
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      scrollProgress = Math.min(1, window.scrollY / maxScroll);
+    }
+
+    function drawFish(x, y, scale, direction, alpha) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(direction, 1);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = 'rgba(176, 230, 236, 0.48)';
+
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 10 * scale, 5 * scale, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(-10 * scale, 0);
+      ctx.lineTo(-16 * scale, -5 * scale);
+      ctx.lineTo(-16 * scale, 5 * scale);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawBranchCoral(x, y, size, angle, alpha) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = 'rgba(165, 215, 205, 0.52)';
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 1.2;
+
+      const branch = (sx, sy, len, a, d) => {
+        if (d === 0 || len < 4) return;
+        const ex = sx + Math.cos(a) * len;
+        const ey = sy + Math.sin(a) * len;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+        branch(ex, ey, len * 0.7, a + 0.5, d - 1);
+        branch(ex, ey, len * 0.62, a - 0.46, d - 1);
+      };
+
+      branch(0, 0, size, -Math.PI / 2, 4);
+      ctx.restore();
+    }
+
+    function drawRiceHead(x, y, radius, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = 'rgba(182, 228, 216, 0.16)';
+      ctx.strokeStyle = 'rgba(182, 228, 216, 0.35)';
+      ctx.lineWidth = 0.75;
+
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      const bumps = 14;
+      for (let i = 0; i < bumps; i++) {
+        const a = (i / bumps) * Math.PI * 2;
+        const rr = radius * (0.3 + (i % 3) * 0.15);
+        const bx = x + Math.cos(a) * rr;
+        const by = y + Math.sin(a) * rr;
+        const br = radius * (0.08 + (i % 2) * 0.03);
+        ctx.beginPath();
+        ctx.arc(bx, by, br, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawSideCoralBeds() {
+      const complexity = 0.25 + scrollProgress * 1.15;
+      const perSide = Math.floor(5 + scrollProgress * 22);
+
+      for (let i = 0; i < perSide; i++) {
+        const t = i / Math.max(1, perSide - 1);
+        const y = ch * (0.14 + t * 0.72);
+        const lX = 24 + (i % 5) * 7;
+        const rX = cw - 24 - (i % 5) * 7;
+        const coralSize = 10 + (i % 4) * 5 + complexity * 8;
+        const alpha = 0.06 + scrollProgress * 0.18;
+
+        if (i % 2 === 0) {
+          drawBranchCoral(lX, y + 14, coralSize, -0.12, alpha);
+          drawBranchCoral(rX, y + 14, coralSize, 0.12, alpha);
+        } else {
+          drawRiceHead(lX + 8, y + 12, 6 + complexity * 4, alpha * 1.15);
+          drawRiceHead(rX - 8, y + 12, 6 + complexity * 4, alpha * 1.15);
+        }
+      }
+    }
+
+    function drawSeaFloor(ts) {
+      const floorReveal = Math.max(0, (scrollProgress - 0.42) / 0.58);
+      if (floorReveal <= 0) return;
+
+      const top = ch * (0.86 - floorReveal * 0.12);
+      const amp = ch * (0.012 + floorReveal * 0.024);
+      const floorY = (t) => top + Math.sin(t * 8 + 0.5) * amp + Math.sin(t * 18 + 1.8) * amp * 0.5;
+
+      ctx.beginPath();
+      ctx.moveTo(0, ch);
+      for (let x = 0; x <= cw; x += Math.max(7, Math.floor(cw / 180))) {
+        const t = x / cw;
+        ctx.lineTo(x, floorY(t));
+      }
+      ctx.lineTo(cw, ch);
+      ctx.closePath();
+
+      const g = ctx.createLinearGradient(0, top - 20, 0, ch);
+      g.addColorStop(0, `rgba(120, 178, 168, ${0.06 + floorReveal * 0.06})`);
+      g.addColorStop(1, `rgba(82, 132, 122, ${0.16 + floorReveal * 0.22})`);
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      const rubble = Math.floor(10 + floorReveal * 70);
+      ctx.fillStyle = `rgba(190, 228, 216, ${0.1 + floorReveal * 0.2})`;
+      for (let i = 0; i < rubble; i++) {
+        const t = i / rubble;
+        const x = t * cw + Math.sin(i * 3.1 + ts * 0.0002) * 4;
+        const y = floorY(t) + 2 + (i % 4) * 2;
+        const r = 1 + (i % 3) * 0.8;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawFishLayer(ts) {
+      const visibleFish = Math.floor(8 + scrollProgress * 56);
+      for (let i = 0; i < visibleFish; i++) {
+        const f = fish[i];
+        const drift = Math.sin(ts * f.wobble + f.phase) * (4 + scrollProgress * 8);
+        let x = ((f.x * cw) + ts * f.speed * cw * f.dir) % (cw + 60);
+        if (x < 0) x += cw + 60;
+        x -= 30;
+        const y = f.y * ch + drift;
+        const scale = f.s * (0.7 + scrollProgress * 0.55);
+        const alpha = 0.08 + scrollProgress * 0.2;
+        drawFish(x, y, scale, f.dir, alpha);
+      }
+    }
+
+    function render(ts) {
+      ctx.clearRect(0, 0, cw, ch);
+
+      const wash = ctx.createLinearGradient(0, 0, 0, ch);
+      wash.addColorStop(0, `rgba(56, 126, 140, ${0.03 + scrollProgress * 0.03})`);
+      wash.addColorStop(1, `rgba(32, 90, 98, ${0.06 + scrollProgress * 0.07})`);
+      ctx.fillStyle = wash;
+      ctx.fillRect(0, 0, cw, ch);
+
+      drawSideCoralBeds();
+      drawFishLayer(ts);
+      drawSeaFloor(ts);
+
+      requestAnimationFrame(render);
+    }
+
+    resizeCanvas();
+    updateScrollProgress();
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
+    requestAnimationFrame(render);
+  </script>
 </body>
 </html>
